@@ -7,6 +7,9 @@ import { Roboto } from 'next/font/google';
 import visible from '../../../assets/visible.png';
 import hide from '../../../assets/hide.png';
 import google from '../../../assets/google.png';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UserSignIn, SignInFormData } from '@/lib/validation';
 import axios from 'axios';
 
 const roboto = Roboto({
@@ -19,19 +22,14 @@ export default function LoginPage() {
     const [signUp, setsignUp] = useState(true);
     const [isHidden1, setIsHidden1] = useState(true);
     const [isHidden2, setIsHidden2] = useState(true);
-
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        const formdata = new FormData(event.currentTarget);
-        const data = {
-            'username': formdata.get('username'),
-            'email': formdata.get('email'),
-            'password': formdata.get('password'),
-            'checkbox': formdata.get('checkbox')
-        };
+    const { register, handleSubmit, formState: { errors } } = useForm<SignInFormData>({
+        resolver: zodResolver(UserSignIn),
+    });
+    async function onSubmit(formdata : SignInFormData) {
+        console.log(formdata);
         try {
-            const response = await axios.post('/api/auth/login',data);
-            console.log(response.data);
+            // const response = await axios.post('/api/auth/login',formdata);
+            // console.log(response.data);
         } catch (error) {
             console.log(error);
         }
@@ -51,19 +49,32 @@ export default function LoginPage() {
                         <div className={`w-1/2 rounded-r-xl bg-white flex flex-col py-5 px-24 ${roboto.className}`}>
                             <h1 className='text-[40px] font-medium'>Create an account</h1>
                             <h1 className='text-sm mt-2'>Already have an account? <button onClick={() => { setsignUp(!signUp); setIsHidden1(true) }} className='text-sky-600 hover:cursor-pointer'>Log in</button></h1>
-                            <form className='flex flex-col gap-3 mt-10' onSubmit={handleSubmit}>
-                                <input className='w-full h-11 rounded-md pl-4 focus:outline-sky-600 bg-sky-100 placeholder:text-gray-400' placeholder='Username' name='username' />
-                                <input className='w-full h-11 rounded-md pl-4 focus:outline-sky-600 bg-sky-100 placeholder:text-gray-400' placeholder='Email' type='email' name='email' />
+                            <form className='flex flex-col gap-3 mt-10' onSubmit={handleSubmit(onSubmit)} noValidate>
+                                <input
+                                    {...register('username')}
+                                    className='w-full h-11 rounded-md pl-4 focus:outline-sky-600 bg-sky-100 placeholder:text-gray-400' placeholder='Username' name='username' />
+                                {errors.username && <p className="text-red-500 text-xs -my-2">{errors.username.message}</p>}
+                                <input
+                                    {...register('email')}
+                                    className='w-full h-11 rounded-md pl-4 focus:outline-sky-600 bg-sky-100 placeholder:text-gray-400' placeholder='Email' type='email' name='email'/>
+                                {errors.email && <p className="text-red-500 text-xs -my-2 ">{errors.email.message}</p>}
                                 <div className='relative'>
-                                    <input className='w-full h-11 rounded-md pl-4 focus:outline-sky-600 bg-sky-100 placeholder:text-gray-400' placeholder='Password' type={isHidden1 ? 'password' : 'text'} name='password' />
+                                    <input
+                                        {...register('password')}
+                                        className='w-full h-11 rounded-md pl-4 focus:outline-sky-600 bg-sky-100 placeholder:text-gray-400' placeholder='Password' type={isHidden1 ? 'password' : 'text'} name='password' />
                                     <button className='hover:cursor-pointer' type='button' onClick={() => setIsHidden1(!isHidden1)}>
                                         <img src={isHidden1 ? hide.src : visible.src} className='w-6 absolute right-4 top-[10px]' />
                                     </button>
                                 </div>
+                                {errors.password && <p className="text-red-500 text-xs -my-2 ">{errors.password.message}</p>}
+
                                 <div className='mt-1 flex items-center gap-3 mb-5'>
-                                    <input type='checkbox' className='w-5 h-5' name='checkbox' />
-                                    <label className='text-sm'>I agree to the <span className='underline text-sky-600 hover:cursor-pointer'>Terms & Conditions</span></label>
+                                    <input
+                                        {...register('checkbox')}
+                                        type='checkbox' className='w-5 h-5' name='checkbox' />
+                                    <label className='text-xs -my-2'>I agree to the <span className='underline text-sky-600 hover:cursor-pointer'>Terms & Conditions</span></label>
                                 </div>
+                                {errors.checkbox && <p className='text-red-500 text-xs -mt-5'>{errors.checkbox.message}</p>}
                                 <button className='w-full h-11 rounded-md text-white bg-sky-600 mb-3 cursor-pointer'>Create account</button>
                             </form>
                             <div className='flex justify-evenly items-center mb-3'>
