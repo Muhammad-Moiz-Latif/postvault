@@ -16,6 +16,9 @@ import { signIn } from "next-auth/react"
 
 import { useRouter } from 'next/navigation';
 import { auth } from '@/auth';
+import { useDispatch } from 'react-redux';
+import { setUserInfo } from '@/state/features/userInfoSlice';
+import { email } from 'zod';
 
 const roboto = Roboto({
     weight: ['400', '700', '600', '500'],
@@ -33,10 +36,12 @@ export default function LoginPage() {
     });;
 
     async function onSubmit(formdata: SignInFormData) {
+        const dispatch = useDispatch();
         console.log(formdata);
         try {
             const response = await axios.post('/api/auth/signin', formdata);
             if (response.status === 200) {
+                dispatch(setUserInfo({ username: formdata.username, email: formdata.email }))
                 toast.success("User created successfully!");
                 router.replace('/home');
             }
@@ -93,7 +98,7 @@ export default function LoginPage() {
                             <hr className=" flex-grow border-sky-400" />
                         </div>
 
-                        <button onClick={() => signIn("google",{
+                        <button onClick={() => signIn("google", {
                             callbackUrl: '/home'
                         })} className='w-full h-11 rounded-md text-white border-sky-600 border-[1px] hover:cursor-pointer'>
                             <div className='flex items-center justify-center gap-2 w-full h-full'>

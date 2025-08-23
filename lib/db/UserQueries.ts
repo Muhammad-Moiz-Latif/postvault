@@ -19,9 +19,9 @@ export async function userExistsByPassword(password: string) {
     return result.rows[0] || null;
 }
 
-export async function findUser(email: string, id: number) {
-    const query = `SELECT id, username, email FROM users WHERE email = $1 AND id = $2 LIMIT 1`;
-    const values = [email, id];
+export async function findUser(email: string, username: string) {
+    const query = `SELECT username, email, image FROM users WHERE email = $1 AND username = $2 LIMIT 1`;
+    const values = [email, username];
     const result = await pool.query(query, values);
     return result.rows[0] || null;
 }

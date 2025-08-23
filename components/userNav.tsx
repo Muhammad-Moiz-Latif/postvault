@@ -1,12 +1,15 @@
 'use client'
 
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import create from '../assets/edit.png';
 import noimage from '../assets/picture.png';
 import search from '../assets/search-interface-symbol.png';
 import bell from '../assets/bell.png';
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
+
 
 const playfair = Playfair_Display({
     subsets: ['latin'],
@@ -19,23 +22,7 @@ const dm_sans = DM_Sans({
 });
 
 export default function UserNav() {
-    const { data: session } = useSession();
-    const [userData, setuserData] = useState({
-        name: "",
-        email: "",
-        image: ""
-    });
-
-    useEffect(() => {
-        if (session?.user) {
-            setuserData({
-                name: session.user.name || "",
-                email: session.user.email || "",
-                image: session.user.image || ""
-            });
-        }
-    }, [session]);
-
+    const Data = useSelector((state: RootState) => state.setUserInfo.list);
     const [drop, setDrop] = useState(false);
     return (
         <>
@@ -58,10 +45,10 @@ export default function UserNav() {
                         </div>
                         <img src={bell.src} className="size-5 hover:cursor-pointer" />
                         <div className="flex flex-col relative">
-                            <img src={userData.image || noimage.src} className={`size-8 hover:cursor-pointer rounded-full ${drop ? "scale-90" : ""} object-cover border-[1px] border-sky-100`} onClick={() => setDrop(!drop)} />
+                            <img src={Data.image || noimage.src} className={`size-8 hover:cursor-pointer rounded-full ${drop ? "scale-90" : ""} object-cover border-[1px] border-sky-100`} onClick={() => setDrop(!drop)} />
                             <div className={`w-40 p-2 h-60 absolute bg-sky-50 border-[1px] border-sky-100 rounded-md -right-9 top-9 ${drop ? "visible" : "hidden"}`}>
                                 <button onClick={() => signOut({ callbackUrl: "/" })} className="hover:cursor-pointer text-[16px] tracking-tighter">Sign Out</button>
-                                <p className="text-xs tracking-tighter text-zinc-600">{userData.email}</p>
+                                <p className="text-xs tracking-tighter text-zinc-600">{Data.email}</p>
                             </div>
                         </div>
                     </ul>

@@ -1,5 +1,4 @@
 import { userExistsByEmail, userExistsByPassword } from "@/lib/db/UserQueries";
-import pool from "@/lib/pg";
 
 import { NextRequest, NextResponse } from "next/server";
 
