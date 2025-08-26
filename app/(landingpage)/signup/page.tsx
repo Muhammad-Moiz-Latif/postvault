@@ -19,6 +19,7 @@ import { auth } from '@/auth';
 import { useDispatch } from 'react-redux';
 import { setUserInfo } from '@/state/features/userInfoSlice';
 import { email } from 'zod';
+import { useToken } from '@/components/TokenProvider';
 
 const roboto = Roboto({
     weight: ['400', '700', '600', '500'],
@@ -26,9 +27,11 @@ const roboto = Roboto({
 });
 
 
-export default function LoginPage() {
+export default function SigninPage() {
     const [sameUser, setsameUser] = useState();
     const [isHidden1, setIsHidden1] = useState(true);
+    const dispatch = useDispatch();
+
     const router = useRouter();
 
     const { register, handleSubmit, formState: { errors } } = useForm<SignInFormData>({
@@ -36,12 +39,10 @@ export default function LoginPage() {
     });;
 
     async function onSubmit(formdata: SignInFormData) {
-        const dispatch = useDispatch();
-        console.log(formdata);
         try {
             const response = await axios.post('/api/auth/signin', formdata);
             if (response.status === 200) {
-                dispatch(setUserInfo({ username: formdata.username, email: formdata.email }))
+                dispatch(setUserInfo({ username: formdata.username, email: formdata.email }));
                 toast.success("User created successfully!");
                 router.replace('/home');
             }

@@ -1,9 +1,11 @@
 "use client";
 
+
 import { setUserInfo } from "@/state/features/userInfoSlice";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+
 
 export default function Home() {
     const { data: session } = useSession();
@@ -16,7 +18,8 @@ export default function Home() {
                 image: session.user.image
             }))
         }
-    },[session])
+    }, [session])
+
     return (
         <>
             <div className="py-16 px-10">

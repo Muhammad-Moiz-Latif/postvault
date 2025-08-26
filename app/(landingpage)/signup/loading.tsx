@@ -14,8 +14,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import {  setUserInfoAsync } from '@/state/features/userInfoSlice';
-import { useToken } from '@/components/TokenProvider';
+import { setUserInfo, setUserInfoAsync } from '@/state/features/userInfoSlice';
 
 const roboto = Roboto({
     weight: ['400', '700', '600', '500'],
@@ -38,8 +37,9 @@ export default function LoginPage() {
         try {
             const response = await axios.post('/api/auth/login', formdata);
             if (response.status === 200) {
+                console.log(response.data);
                 //@ts-ignore
-                dispatch(setUserInfoAsync({ email: formdata.email }))
+                dispatch(setUserInfoAsync({email:formdata.email}))
                 toast.success("User Loggedin successfully!");
                 router.replace('/home');
             }
@@ -98,4 +98,5 @@ export default function LoginPage() {
         </>
     )
 }
+
 

@@ -2,7 +2,7 @@ import pool from "@/lib/pg";
 
 
 export async function userExistsByEmail(email: string) {
-    const query = `SELECT email FROM users WHERE email = $1 LIMIT 1`;
+    const query = `SELECT username ,image , email FROM users WHERE email = $1 LIMIT 1`;
     const result = await pool.query(query, [email]);
     return result.rows[0] || null;
 };

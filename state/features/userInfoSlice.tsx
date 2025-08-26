@@ -21,26 +21,18 @@ const initialState: userState = {
 };
 
 export const setUserInfoAsync = createAsyncThunk(
-    "User/Get", async ({ username, email }: { username: string, email: string }, { dispatch }) => {
-        const session = await auth();
-        if (session?.user) {
+    "User/Get", async ({ email }: { email: string }, { dispatch }) => {
+        const body = { email }
+        console.log(body);
+        const response = await axios.post(`/api/getUser`, body);
+        if (response.status === 200) {
+            const body = response.data.getData;
+            console.log(response.data.getData);
             dispatch(setUserInfo({
-                username: session.user.name,
-                email: session.user.email,
-                image: session.user.image
+                username: body.username,
+                email: body.email,
+                image: body.image
             }));
-            const body = {
-                username, email
-            }
-            const response = await axios.post(`/api/getUser`, body);
-            if (response.status === 200) {
-                const body = response.data;
-                dispatch(setUserInfo({
-                    username: body.username,
-                    email: body.email,
-                    image: body.image
-                }));
-            }
         }
     },
 
@@ -51,9 +43,13 @@ export const userInfoSlice = createSlice({
     reducers: {
         setUserInfo(state, action) {
             state.list = action.payload
+        },
+
+        UserLogout(state) {
+            return initialState;
         }
     }
 })
 
-export const { setUserInfo } = userInfoSlice.actions;
+export const { setUserInfo, UserLogout } = userInfoSlice.actions;
 export default userInfoSlice.reducer;

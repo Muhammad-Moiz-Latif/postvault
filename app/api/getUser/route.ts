@@ -1,10 +1,11 @@
-import { findUser } from "@/lib/db/UserQueries";
+import { userExistsByEmail } from "@/lib/db/UserQueries";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
-        const { username, email } = await req.json();
-        const getData = await findUser(username, email);
+        const { email } = await req.json();
+        console.log(email);
+        const getData = await userExistsByEmail(email);
         if (getData) {
             return NextResponse.json({ getData }, { status: 200 })
         }

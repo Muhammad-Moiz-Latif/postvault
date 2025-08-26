@@ -1,5 +1,6 @@
 import pool from "@/lib/pg";
 import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 import { userExistsByEmail, userExistsByPassword, userExistsByUsername } from "@/lib/db/UserQueries";
 
 export async function POST(req: NextRequest) {
@@ -19,21 +20,61 @@ export async function POST(req: NextRequest) {
             } else if (check3) {
                 return NextResponse.json({ message: "User with this password already exists, please try again." }, { status: 400 });
             }
+
+            //JWT Tokens
+            const accessToken = jwt.sign(
+                { email: email },               // payload
+                process.env.ACCESS_TOKEN_SECRET as string,      // secret key
+                { expiresIn: "5m" }                   // options
+            );
+            const refreshToken = jwt.sign(
+                { email: email },               // payload
+                process.env.REFRESH_TOKEN_SECRET as string,      // secret key
+                { expiresIn: "1d" }                   // options
+            );
             //user with same data does not exist so creating user
-            if(image){
-                 const query = `INSERT INTO users
+            if (image) {
+                const query = `INSERT INTO users
             (username, password, email, image) VALUES ($1,$2,$3,$4)
             RETURNING id,username,email,created_at,image`;
-            const values = [username, password, email, image];
-            const result = await pool.query(query, values);
-            return NextResponse.json({ 'message': 'User created successfully', 'data': result.rows[0] }, { status: 200 });
+                const values = [username, password, email, image];
+                const result = await pool.query(query, values);
+                const response = NextResponse.json({ 'message': 'User created successfully', 'data': result.rows[0] }, { status: 200 });
+                response.cookies.set("accessToken", accessToken, {
+                    httpOnly: true,
+                    sameSite: "strict",
+                    path: "/",
+                    maxAge: 60 * 5
+                });
+
+                response.cookies.set("refreshToken", refreshToken, {
+                    httpOnly: true,
+                    sameSite: "strict",    // protect against CSRF
+                    path: "/",             // cookie valid for all routes
+                    maxAge: 24 * 60 * 60 * 1000 // 1 day
+                });
+                return response;
             }
             const query = `INSERT INTO users
             (username, password, email) VALUES ($1,$2,$3)
             RETURNING id,username,email,created_at`;
             const values = [username, password, email];
             const result = await pool.query(query, values);
-            return NextResponse.json({ 'message': 'User created successfully', 'data': result.rows[0] }, { status: 200 });
+            const response = NextResponse.json({ 'message': 'User created successfully', 'data': result.rows[0] }, { status: 200 });
+            response.cookies.set("accessToken", accessToken, {
+                httpOnly: true,
+                sameSite: "strict",
+                path: "/",
+                maxAge: 60 * 5
+            });
+
+            response.cookies.set("refreshToken", refreshToken, {
+                httpOnly: true,
+                sameSite: "strict",    // protect against CSRF
+                path: "/",             // cookie valid for all routes
+                maxAge: 24 * 60 * 60 * 1000 // 1 day
+            });
+            return response;
         }
     } catch (error) {
         console.log('Error', error);
