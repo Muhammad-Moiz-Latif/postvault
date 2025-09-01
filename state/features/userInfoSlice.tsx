@@ -27,7 +27,6 @@ export const setUserInfoAsync = createAsyncThunk(
         const response = await axios.post(`/api/getUser`, body);
         if (response.status === 200) {
             const body = response.data.getData;
-            console.log(response.data.getData);
             dispatch(setUserInfo({
                 username: body.username,
                 email: body.email,

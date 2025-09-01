@@ -9,7 +9,7 @@ import bell from '../assets/bell.png';
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState, store } from "@/state/store";
-import { Persistor, persistStore } from "redux-persist";
+import {  persistStore } from "redux-persist";
 import { UserLogout } from "@/state/features/userInfoSlice";
 import Link from "next/link";
 import axios from "axios";
@@ -30,7 +30,6 @@ let persistor = persistStore(store);
 export default function UserNav() {
     const Data = useSelector((state: RootState) => state.setUserInfo.list);
     const [drop, setDrop] = useState(false);
-
     async function handleClick() {
         try {
             const response = await axios.post('/api/auth/logout', {}, { withCredentials: true });
@@ -62,14 +61,15 @@ export default function UserNav() {
                 <div>
                     <ul className="flex gap-10 items-center">
                         <Link href="/about" className="hover:cursor-pointer tracking-tighter text-[16px]">About Us</Link>
-                        <div className="flex gap-1 justify-center items-center hover:cursor-pointer">
+                        <Link href="/new-story" className="flex gap-1 justify-center items-center hover:cursor-pointer">
                             <li className=" tracking-tighter text-[16px]">Create</li>
                             <img src={create.src} className="size-4" />
-                        </div>
+                        </Link>
                         <img src={bell.src} className="size-5 hover:cursor-pointer" />
                         <div className="flex flex-col relative">
                             <img src={Data.image || noimage.src} className={`size-8 hover:cursor-pointer rounded-full ${drop ? "scale-90" : ""} object-cover border-[1px] border-sky-100`} onClick={() => setDrop(!drop)} />
-                            <div className={`w-40 p-2 h-60 absolute bg-sky-50 border-[1px] border-sky-100 rounded-md -right-9 top-9 ${drop ? "visible" : "hidden"}`}>
+                            <div className={`w-40 p-2 h-60 absolute bg-sky-50 border-[1px] border-sky-100 flex flex-col items-start rounded-md -right-9 top-9 ${drop ? "visible" : "hidden"}`}>
+                                <Link href="/profile">Profile</Link>
                                 <button
                                     onClick={handleClick}
                                     className="hover:cursor-pointer text-[16px] tracking-tighter"

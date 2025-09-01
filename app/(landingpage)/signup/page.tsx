@@ -15,11 +15,9 @@ import axios from 'axios';
 import { signIn } from "next-auth/react"
 
 import { useRouter } from 'next/navigation';
-import { auth } from '@/auth';
 import { useDispatch } from 'react-redux';
 import { setUserInfo } from '@/state/features/userInfoSlice';
 import { email } from 'zod';
-import { useToken } from '@/components/TokenProvider';
 
 const roboto = Roboto({
     weight: ['400', '700', '600', '500'],

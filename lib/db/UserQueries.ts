@@ -24,4 +24,14 @@ export async function findUser(email: string, username: string) {
     const values = [email, username];
     const result = await pool.query(query, values);
     return result.rows[0] || null;
+};
+
+export async function updateUser(image: string, username: string) {
+    const query = `UPDATE users
+    SET image = $2
+    WHERE username = $1
+    RETURNING *`;
+    const value = [username, image];
+    const result = await pool.query(query, value);
+    return result.rows[0] || null;
 }
