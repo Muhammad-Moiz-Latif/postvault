@@ -1,39 +1,66 @@
-import { configureStore } from '@reduxjs/toolkit'
-import setUserInfoReducer from './features/userInfoSlice'
-import storage from 'redux-persist/lib/storage'
+import { configureStore } from "@reduxjs/toolkit";
+import storage from "redux-persist/lib/storage";
 import {
-    persistReducer, FLUSH,
-    REHYDRATE,
-    PAUSE,
-    PERSIST,
-    PURGE,
-    REGISTER,
-    persistStore,
-} from 'redux-persist'
+  persistReducer,
+  persistStore,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
 
-const persistConfig = {
-    key: 'root',
-    storage,
-}
+import setUserInfoReducer from "./features/userInfoSlice";
+import setUserPostReducer from "./features/userPostSlice";
+import setPostReducer from "./features/PostsSlice";
 
-const persistedReducer = persistReducer(persistConfig, setUserInfoReducer)
+// Configs
+const userInfoPersistConfig = {
+  key: "userInfo",
+  storage,
+};
 
+const userPostPersistConfig = {
+  key: "userPost",
+  storage,
+};
+const PostsPersistConfig = {
+  key: "Posts",
+  storage,
+};
+// Wrap each reducer
+const persistedUserInfoReducer = persistReducer(
+  userInfoPersistConfig,
+  setUserInfoReducer,
+);
+const persistedUserPostReducer = persistReducer(
+  userPostPersistConfig,
+  setUserPostReducer,
+);
 
+const persistedPostsReducer = persistReducer(
+  PostsPersistConfig,
+  setPostReducer,
+);
+
+// Store
 export const store = configureStore({
-    reducer: {
-        setUserInfo: persistedReducer
-    }, middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-            serializableCheck: {
-                ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-            },
-        }),
+  reducer: {
+    setUserInfo: persistedUserInfoReducer,
+    setUserPost: persistedUserPostReducer,
+    setPost: persistedPostsReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
 
 export const persistor = persistStore(store);
 
-
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
-export type AppDispatch = typeof store.dispatch
+// Types
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

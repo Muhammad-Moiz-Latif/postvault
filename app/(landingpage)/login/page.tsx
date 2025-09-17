@@ -15,7 +15,6 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import {  setUserInfoAsync } from '@/state/features/userInfoSlice';
-import { useToken } from '@/components/TokenProvider';
 
 const roboto = Roboto({
     weight: ['400', '700', '600', '500'],

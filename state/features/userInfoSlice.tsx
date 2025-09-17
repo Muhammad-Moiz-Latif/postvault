@@ -1,54 +1,54 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { auth } from "@/auth";
 import axios from "axios";
 
 interface userData {
-    username: string,
-    email: string,
-    image: string,
-};
+  username: string;
+  email: string;
+  image: string;
+}
 
 interface userState {
-    list: userData;
-};
+  list: userData;
+}
 
 const initialState: userState = {
-    list: {
-        username: "",
-        email: "",
-        image: ""
-    }
+  list: {
+    username: "",
+    email: "",
+    image: "",
+  },
 };
 
 export const setUserInfoAsync = createAsyncThunk(
-    "User/Get", async ({ email }: { email: string }, { dispatch }) => {
-        const body = { email }
-        console.log(body);
-        const response = await axios.post(`/api/getUser`, body);
-        if (response.status === 200) {
-            const body = response.data.getData;
-            dispatch(setUserInfo({
-                username: body.username,
-                email: body.email,
-                image: body.image
-            }));
-        }
+  "User/Get",
+  async ({ email }: { email: string }, { dispatch }) => {
+    const body = { email };
+    const response = await axios.post(`/api/features/getUser`, body);
+    if (response.status === 200) {
+      const body = response.data.getData;
+      dispatch(
+        setUserInfo({
+          username: body.username,
+          email: body.email,
+          image: body.image,
+        }),
+      );
+    }
+  },
+);
+export const userInfoSlice = createSlice({
+  name: "userInfo",
+  initialState,
+  reducers: {
+    setUserInfo(state, action) {
+      state.list = action.payload;
     },
 
-)
-export const userInfoSlice = createSlice({
-    name: "userInfo",
-    initialState,
-    reducers: {
-        setUserInfo(state, action) {
-            state.list = action.payload
-        },
-
-        UserLogout(state) {
-            return initialState;
-        }
-    }
-})
+    UserLogout(state) {
+      return initialState;
+    },
+  },
+});
 
 export const { setUserInfo, UserLogout } = userInfoSlice.actions;
 export default userInfoSlice.reducer;
