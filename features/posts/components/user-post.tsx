@@ -1,4 +1,5 @@
 import { RootState } from "@/state/store";
+import Link from "next/link";
 import { useSelector } from "react-redux";
 
 export default function UserPosts() {
@@ -15,9 +16,12 @@ export default function UserPosts() {
                 dangerouslySetInnerHTML={{ __html: post.html_content }}
               />
               <div className="flex gap-3">
-                <button className="bg-amber-600 text-white px-3 py-1 rounded-md">
+                <Link
+                  href={`edit-post/${post.id}`}
+                  className="bg-amber-600 text-white px-3 py-1 rounded-md"
+                >
                   Edit Post
-                </button>
+                </Link>
                 <button className="bg-red-600 text-black px-3 py-1 rounded-md">
                   Delete Post
                 </button>

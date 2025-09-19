@@ -2,9 +2,7 @@
 
 import { signOut } from "next-auth/react";
 import { Playfair_Display, DM_Sans } from "next/font/google";
-import create from "../assets/edit.png";
 import noimage from "../assets/picture.png";
-import search from "../assets/search-interface-symbol.png";
 import bell from "../assets/bell.png";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -26,7 +24,13 @@ const dm_sans = DM_Sans({
 
 let persistor = persistStore(store);
 
-export default function EditorNav({ onPublish }: { onPublish?: () => void }) {
+export default function EditorNav({
+  onPublish,
+  Loading,
+}: {
+  onPublish?: () => void;
+  Loading: boolean;
+}) {
   const Data = useSelector((state: RootState) => state.UserInfo.list);
   const [drop, setDrop] = useState(false);
   async function handleClick() {
@@ -36,7 +40,6 @@ export default function EditorNav({ onPublish }: { onPublish?: () => void }) {
         {},
         { withCredentials: true },
       );
-      console.log(response.data);
       if (response) {
         {
           store.dispatch(UserLogout());
@@ -66,7 +69,7 @@ export default function EditorNav({ onPublish }: { onPublish?: () => void }) {
               className="hover:cursor-pointer tracking-tighter text-sm bg-sky-800 text-white px-6 py-2 rounded-md"
               onClick={onPublish}
             >
-              Publish
+              {Loading ? "Publishing" : "Publish"}
             </button>
             <img src={bell.src} className="size-5 hover:cursor-pointer" />
             <div className="flex flex-col relative">
