@@ -1,6 +1,6 @@
 "use client";
 
-import { setUserInfo } from "@/state/features/userInfoSlice";
+import { setUserInfo } from "@/features/users/userInfoSlice";
 import { RootState } from "@/state/store";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
@@ -9,8 +9,7 @@ import { useDispatch } from "react-redux";
 
 export default function Home() {
   const { data: session } = useSession();
-  const PostsData = useSelector((state: RootState) => state.setPost.list);
-  console.log(PostsData);
+  const PostsData = useSelector((state: RootState) => state.AllPost.list);
   const dispatch = useDispatch();
   useEffect(() => {
     if (session?.user) {

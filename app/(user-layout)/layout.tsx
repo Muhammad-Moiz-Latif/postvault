@@ -1,8 +1,8 @@
 "use client";
 
 import UserNav from "@/components/userNav";
-import { setUserPostAsync } from "@/state/features/userPostSlice";
-import { setPostAsync } from "@/state/features/PostsSlice";
+import { setUserPostAsync } from "@/features/users/userPostSlice";
+import { setPostAsync } from "@/features/posts/PostsSlice";
 import { RootState } from "@/state/store";
 import { SessionProvider } from "next-auth/react";
 import { useEffect } from "react";
@@ -15,7 +15,7 @@ export default function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const userData = useSelector((state: RootState) => state.setUserInfo.list);
+  const userData = useSelector((state: RootState) => state.UserInfo.list);
   const dispatch = useDispatch();
   useEffect(() => {
     //@ts-ignore

@@ -6,8 +6,9 @@ import defaultImg from "../../../assets/picture.png";
 import { CldUploadWidget } from "next-cloudinary";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setUserInfoAsync } from "@/state/features/userInfoSlice";
+import { setUserInfoAsync } from "@/features/users/userInfoSlice";
 import { useEffect } from "react";
+import UserPosts from "@/features/posts/components/user-post";
 
 type UploadResult = {
   event?: string; // can be "success", "close", "queues-end", etc.
@@ -15,7 +16,7 @@ type UploadResult = {
 };
 
 export default function Profile() {
-  const userData = useSelector((state: RootState) => state.setUserInfo.list);
+  const userData = useSelector((state: RootState) => state.UserInfo.list);
   const dispatch = useDispatch();
   async function handleSuccess(result: UploadResult) {
     try {
@@ -39,8 +40,8 @@ export default function Profile() {
   }, []);
 
   return (
-    <>
-      <div className="py-16 flex justify-start px-10 w-full h-screen items-start flex-col">
+    <div className="w-full h-screen grid grid-cols-2 px-10 py-16">
+      <div className=" flex justify-start  w-full h-screen items-start flex-col">
         {userData?.image ? (
           <img
             src={userData?.image}
@@ -71,6 +72,9 @@ export default function Profile() {
         <h1>{userData.username}</h1>
         <p>{userData.email}</p>
       </div>
-    </>
+      <div>
+        <UserPosts />
+      </div>
+    </div>
   );
 }

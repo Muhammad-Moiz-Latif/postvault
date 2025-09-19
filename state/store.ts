@@ -11,9 +11,9 @@ import {
   REGISTER,
 } from "redux-persist";
 
-import setUserInfoReducer from "./features/userInfoSlice";
-import setUserPostReducer from "./features/userPostSlice";
-import setPostReducer from "./features/PostsSlice";
+import setUserInfoReducer from "../features/users/userInfoSlice";
+import setUserPostReducer from "../features/users/userPostSlice";
+import setPostReducer from "../features/posts/PostsSlice";
 
 // Configs
 const userInfoPersistConfig = {
@@ -47,9 +47,9 @@ const persistedPostsReducer = persistReducer(
 // Store
 export const store = configureStore({
   reducer: {
-    setUserInfo: persistedUserInfoReducer,
-    setUserPost: persistedUserPostReducer,
-    setPost: persistedPostsReducer,
+    UserInfo: persistedUserInfoReducer,
+    UserPosts: persistedUserPostReducer,
+    AllPost: persistedPostsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

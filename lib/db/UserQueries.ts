@@ -13,9 +13,9 @@ export async function userExistsByUsername(username: string) {
 }
 
 export async function userPostsById(id: string) {
-  const query = `SELECT * FROM user_posts where author_id=$1 LIMIT 1`;
+  const query = `SELECT * FROM user_posts where author_id=$1`;
   const result = await pool.query(query, [id]);
-  return result.rows[0] || null;
+  return result.rows || null;
 }
 
 export async function userExistsByPassword(password: string) {
@@ -44,6 +44,5 @@ export async function updateUser(image: string, username: string) {
 export async function getAllPosts() {
   const query = `SELECT * FROM user_posts`;
   const result = await pool.query(query);
-  console.log(result.rows);
   return result.rows || null;
 }

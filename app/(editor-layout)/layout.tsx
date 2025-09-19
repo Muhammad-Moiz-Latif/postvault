@@ -2,7 +2,7 @@
 "use client";
 
 import EditorNav from "@/components/EditorNav";
-import BlockEditor from "@/components/BlockEditor";
+import BlockEditor from "@/features/editor/components/BlockEditor";
 import { SessionProvider } from "next-auth/react";
 import { useState } from "react";
 import axios from "axios";
