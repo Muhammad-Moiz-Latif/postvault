@@ -7,11 +7,13 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import axios from "axios";
 import EditorNav from "@/components/EditorNav";
+import { toast } from "react-toastify";
 
 export default function NewStoryPage() {
   const [editor, setEditor] = useState<any>(null);
   const [isLoading, setLoading] = useState(false);
   const getUser = useSelector((state: RootState) => state.UserInfo.list);
+  const [whichOne] = useState(true);
 
   function extractImages(blocks: any[]): { url: string; blockIndex: number }[] {
     const images: { url: string; blockIndex: number }[] = [];
@@ -64,6 +66,7 @@ export default function NewStoryPage() {
 
       if (res.status === 200) {
         console.log(res.data.message);
+        toast.success("Blog has been created successfully!");
       }
     } catch (error) {
       console.error(error);
@@ -74,7 +77,11 @@ export default function NewStoryPage() {
 
   return (
     <div className="w-full h-screen">
-      <EditorNav onPublish={handlePublish} Loading={isLoading} />
+      <EditorNav
+        onPublish={handlePublish}
+        Loading={isLoading}
+        whichOne={whichOne}
+      />
       <div className="pt-16">
         <BlockEditor onReady={setEditor} />
       </div>

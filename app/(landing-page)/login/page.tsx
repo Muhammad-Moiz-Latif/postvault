@@ -41,7 +41,7 @@ export default function LoginPage() {
       if (response.status === 200) {
         //@ts-ignore
         dispatch(setUserInfoAsync({ email: formdata.email }));
-        toast.success("User Loggedin successfully!");
+        toast.success("User Logged in successfully!");
         router.replace("/home");
       }
     } catch (error: any) {

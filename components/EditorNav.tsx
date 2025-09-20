@@ -27,9 +27,11 @@ let persistor = persistStore(store);
 export default function EditorNav({
   onPublish,
   Loading,
+  whichOne,
 }: {
   onPublish?: () => void;
-  Loading: boolean;
+  Loading?: boolean;
+  whichOne?: boolean;
 }) {
   const Data = useSelector((state: RootState) => state.UserInfo.list);
   const [drop, setDrop] = useState(false);
@@ -69,7 +71,13 @@ export default function EditorNav({
               className="hover:cursor-pointer tracking-tighter text-sm bg-sky-800 text-white px-6 py-2 rounded-md"
               onClick={onPublish}
             >
-              {Loading ? "Publishing" : "Publish"}
+              {whichOne
+                ? Loading
+                  ? "Publishing"
+                  : "Publish"
+                : Loading
+                  ? "Updating"
+                  : "Update"}
             </button>
             <img src={bell.src} className="size-5 hover:cursor-pointer" />
             <div className="flex flex-col relative">
