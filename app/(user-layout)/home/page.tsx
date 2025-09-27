@@ -1,5 +1,6 @@
 "use client";
 
+import Post from "@/features/posts/components/post-design";
 import { setUserInfo } from "@/features/users/userInfoSlice";
 import { RootState } from "@/state/store";
 import { useSession } from "next-auth/react";
@@ -26,18 +27,7 @@ export default function Home() {
   return (
     <>
       <div className="py-16 px-10">
-        {PostsData && PostsData.length > 0 ? (
-          PostsData.map((posts) => (
-            <div key={posts.id} className="p-6 mb-6 rounded-xl shadow bg-white">
-              <div
-                className="prose"
-                dangerouslySetInnerHTML={{ __html: posts.html_content }}
-              />
-            </div>
-          ))
-        ) : (
-          <div>Feed is empty</div>
-        )}
+        <Post />
       </div>
     </>
   );
