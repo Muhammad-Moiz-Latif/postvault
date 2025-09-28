@@ -12,6 +12,12 @@ export async function userExistsByUsername(username: string) {
   return result.rows[0] || null;
 }
 
+export async function userExistsById(id: string) {
+  const query = "SELECT username, image FROM users where id = $1 LIMIT 1";
+  const result = await pool.query(query, [id]);
+  return result.rows[0] || null;
+}
+
 export async function userPostsById(id: string) {
   const query = `SELECT * FROM user_posts where author_id=$1`;
   const result = await pool.query(query, [id]);

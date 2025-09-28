@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="py-16 px-10">
+      <div className="py-13 px-10">
         <Post />
       </div>
     </>

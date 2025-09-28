@@ -76,7 +76,7 @@ export default function NewStoryPage() {
   };
 
   return (
-    <div className="w-full h-screen">
+    <div className="w-full min-h-screen pb-28">
       <EditorNav
         onPublish={handlePublish}
         Loading={isLoading}

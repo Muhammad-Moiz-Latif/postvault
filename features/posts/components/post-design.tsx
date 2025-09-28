@@ -1,4 +1,6 @@
 import { RootState } from "@/state/store";
+import { Roboto } from "next/font/google";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
@@ -8,7 +10,14 @@ interface PostType {
   url?: string;
   paragraph?: string;
   createdAt?: string;
+  username?: string;
+  image?: string;
 }
+
+const roboto = Roboto({
+  weight: ["400", "700", "600", "500"],
+  subsets: ["latin"],
+});
 
 export default function PostFeed() {
   const Posts = useSelector((state: RootState) => state.AllPost.list);
@@ -20,14 +29,21 @@ export default function PostFeed() {
     return text.slice(0, maxLength) + "…";
   }
 
+  const router = useRouter();
+
   useEffect(() => {
     if (!Posts || Posts.length === 0) return;
 
     const extractedPosts: PostType[] = [];
 
     Posts.forEach((post: any) => {
+      console.log(post);
       const json = post.json_content;
-      const dataObj: PostType = { id: post.id };
+      const dataObj: PostType = {
+        id: post.id,
+        username: post.username,
+        image: post.image,
+      };
       let headingFound = false;
       let paragraphFound = false;
       const date = new Date(post.created_at);
@@ -68,17 +84,26 @@ export default function PostFeed() {
   }, [Posts]);
 
   return (
-    <div className="max-w-3xl m-20">
+    <div
+      className={`max-w-3xl ${roboto.className} border-x-[1px] border-sky-100`}
+    >
       {postCards.map((post) => (
         <div
           key={post.id}
-          className="bg-white h-60 rounded-sm border-b-[1px] border-zinc-300 p-6 cursor-pointer flex gap-4"
-          onClick={() => console.log(`Go to post ${post.id}`)} // 🧭 Replace with navigation later
+          className="bg-white border-b-[1px] border-sky-100 p-6 cursor-pointer flex gap-4"
+          onClick={() => router.push(`/home/${post.id}`)} // 🧭 Replace with navigation later
         >
           <div className="flex flex-col gap-4">
+            <div className="flex gap-2 items-center">
+              <img src={post.image} className="rounded-full size-6" />
+              <h1 className="text-sm text-black">{post.username}</h1>
+            </div>
             <h1 className="text-3xl font-bold leading-7">{post.heading}</h1>
             <p className="text-gray-600 text-lg leading-5">
-              {truncateText(post.paragraph, 100)}
+              {
+                //@ts-ignore
+                truncateText(post.paragraph, 100)
+              }
             </p>
             <h2 className="text-zinc-600 text-sm ">{post.createdAt}</h2>
           </div>

@@ -7,6 +7,8 @@ interface Post {
   html_content: string;
   created_at: string;
   updated_at: string;
+  username: string;
+  image: string;
 }
 
 interface PostState {
