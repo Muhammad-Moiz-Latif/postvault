@@ -1,5 +1,6 @@
 "use client";
 
+import CommentSection from "@/features/posts/components/postcomment";
 import { RootState } from "@/state/store";
 import { use, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -12,7 +13,6 @@ interface PostType {
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  console.log(typeof id);
   const Posts = useSelector((state: RootState) => state.AllPost.list);
   const [Post, setPost] = useState<PostType>();
 
@@ -25,13 +25,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   }, []);
   return (
     <>
-      <div className="py-16 px-10">
+      <div className="py-13 px-10">
         {" "}
         <div
           className="prose"
           //@ts-ignore
           dangerouslySetInnerHTML={{ __html: Post?.html_content }}
         />
+        <CommentSection PostId={id} />
       </div>
     </>
   );

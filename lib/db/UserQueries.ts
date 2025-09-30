@@ -52,3 +52,18 @@ export async function getAllPosts() {
   const result = await pool.query(query);
   return result.rows || null;
 }
+
+export async function getAllCommentswithUsers(PostId: string) {
+  const query = `SELECT uc.id,
+  uc.comment,
+  uc.user_id,
+  uc.posts_id AS post_id,
+  uc.created_at,
+  u.username,
+  u.image FROM user_comments uc JOIN users u
+  ON uc.user_id = u.id WHERE uc.posts_id = $1 ORDER BY uc.created_at DESC`;
+  const value = [PostId];
+  const result = await pool.query(query, value);
+  console.log(PostId);
+  return result.rows || null;
+}
