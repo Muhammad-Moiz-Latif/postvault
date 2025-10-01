@@ -1,6 +1,7 @@
 "use client";
 
 import CommentSection from "@/features/posts/components/postcomment";
+import Like from "@/features/posts/components/postlike";
 import { RootState } from "@/state/store";
 import { use, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -25,10 +26,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   }, []);
   return (
     <>
-      <div className="py-13 px-10">
+      <div className="">
         {" "}
+        <Like PostId={id} />
         <div
-          className="prose"
+          className="prose px-44 py-20"
           //@ts-ignore
           dangerouslySetInnerHTML={{ __html: Post?.html_content }}
         />

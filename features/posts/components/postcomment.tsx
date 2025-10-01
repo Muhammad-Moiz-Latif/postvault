@@ -5,6 +5,12 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { setCommentAsync } from "../CommentsSlice";
+import { Roboto } from "next/font/google";
+
+const roboto = Roboto({
+  weight: ["400", "700", "600", "500"],
+  subsets: ["latin"],
+});
 
 export default function CommentSection({ PostId }: { PostId: string }) {
   const User = useSelector((state: RootState) => state.UserInfo.list);
@@ -44,10 +50,23 @@ export default function CommentSection({ PostId }: { PostId: string }) {
     }
   }
 
+  function setDate(dateString: string) {
+    const isoDate = dateString;
+    const date = new Date(isoDate);
+
+    const formatted = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+    });
+    return formatted;
+  }
+
   return (
     <>
-      <div className="w-full px-44 py-28 border-t-[1px] border-sky-100">
-        <h1 className="text-2xl font-bold mb-8">Responses</h1>
+      <div
+        className={`w-full px-44 py-28 border-t-[1px] border-sky-100 ${roboto.className}`}
+      >
+        <h1 className="text-2xl font-bold mb-8">{`Responses (${comments.length})`}</h1>
         <div className="flex gap-2 items-center">
           <img src={User.image} className="rounded-full size-8" />
           <h1>{User.username}</h1>
@@ -86,6 +105,28 @@ export default function CommentSection({ PostId }: { PostId: string }) {
         </form>
         <div className="w-full h-[1px] bg-zinc-200 my-13"></div>
         {/* list the comments from different accounts here */}
+        <div className="w-full">
+          {comments && comments.length > 0
+            ? comments.map((comment) => (
+                <div
+                  className="w-full flex flex-col gap-3 mb-5"
+                  key={comment.id}
+                >
+                  <div className="flex gap-3 items-start justify-start">
+                    <img src={comment.image} className="rounded-full size-8" />
+                    <div className="flex flex-col">
+                      <h1>{comment.username}</h1>
+                      <h1 className="text-sm text-zinc-600 tracking-tight">
+                        {setDate(comment.created_at)}
+                      </h1>
+                    </div>
+                  </div>
+                  <p className="text-sm text-zinc-800">{comment.comment}</p>
+                  <div className="w-full h-[1px] bg-zinc-200 my-6"></div>
+                </div>
+              ))
+            : null}
+        </div>
       </div>
     </>
   );
