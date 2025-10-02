@@ -22,7 +22,6 @@ export default function CommentSection({ PostId }: { PostId: string }) {
   useEffect(() => {
     //@ts-ignore
     dispatch(setCommentAsync({ PostId }));
-    console.log(comments);
   }, [PostId, dispatch]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

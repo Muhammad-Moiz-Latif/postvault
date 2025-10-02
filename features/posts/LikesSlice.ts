@@ -17,9 +17,10 @@ const initialState: LikeState = {
 
 export const setLikeAsync = createAsyncThunk(
   "Likes/Get",
-  async (_arg, { dispatch }) => {
-    const response = await axios.get("/api/features/getLikes");
+  async ({ PostId }: { PostId: string }, { dispatch }) => {
+    const response = await axios.post("/api/features/getLikes", { PostId });
     if (response.status === 200) {
+      console.log("activate", response.data.AllLikes);
       dispatch(setLikes(response.data.AllLikes));
     }
   },
@@ -50,17 +51,17 @@ export const LikesSlice = createSlice({
     },
 
     setUserLikes(state, action) {
-      const { UserId, PostId, newClaps } = action.payload;
+      const { user_id, posts_id, claps } = action.payload;
       const like = state.list.find(
-        (l) => l.user_id === Number(UserId) && l.post_id === Number(PostId),
+        (l) => l.user_id === Number(user_id) && l.post_id === Number(posts_id),
       );
       if (like) {
-        like.claps = newClaps;
+        like.claps = claps;
       } else {
         state.list.push({
-          user_id: Number(UserId),
-          post_id: Number(PostId),
-          claps: newClaps,
+          user_id: Number(user_id),
+          post_id: Number(posts_id),
+          claps: claps,
         });
       }
     },

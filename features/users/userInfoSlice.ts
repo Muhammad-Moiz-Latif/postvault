@@ -5,6 +5,7 @@ interface userData {
   username: string;
   email: string;
   image: string;
+  id: string;
 }
 
 interface userState {
@@ -16,6 +17,7 @@ const initialState: userState = {
     username: "",
     email: "",
     image: "",
+    id: "",
   },
 };
 
@@ -26,11 +28,13 @@ export const setUserInfoAsync = createAsyncThunk(
     const response = await axios.post(`/api/features/getUser`, body);
     if (response.status === 200) {
       const body = response.data.getData;
+      console.log(response.data.getData);
       dispatch(
         setUserInfo({
           username: body.username,
           email: body.email,
           image: body.image,
+          id: body.id,
         }),
       );
     }

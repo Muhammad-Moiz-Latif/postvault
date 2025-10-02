@@ -37,7 +37,6 @@ export default function PostFeed() {
     const extractedPosts: PostType[] = [];
 
     Posts.forEach((post: any) => {
-      console.log(post);
       const json = post.json_content;
       const dataObj: PostType = {
         id: post.id,

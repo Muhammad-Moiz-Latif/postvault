@@ -67,3 +67,34 @@ export async function getAllCommentswithUsers(PostId: string) {
   console.log(PostId);
   return result.rows || null;
 }
+
+export async function getAllLikes({ PostId }: { PostId: string }) {
+  const query = `SELECT * FROM users_post_like WHERE posts_id=$1`;
+  const value = [PostId];
+  const result = await pool.query(query, value);
+  return result.rows || null;
+}
+
+export async function incrementUserLikes({
+  UserId,
+  PostId,
+}: {
+  UserId: string;
+  PostId: String;
+}) {
+  const query = `UPDATE users_post_like
+  SET claps=claps+1 WHERE user_id=$1 AND posts_id=$2
+  RETURNING *`;
+  const values = [UserId, PostId];
+  const result = await pool.query(query, values);
+  if (result.rowCount === 0) {
+    const insertQuery = `
+      INSERT INTO users_post_like (user_id, posts_id, claps)
+      VALUES ($1, $2, 1)
+      RETURNING *;
+    `;
+    const insertResult = await pool.query(insertQuery, values);
+    return insertResult.rows[0];
+  }
+  return result.rows[0];
+}

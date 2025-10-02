@@ -15,6 +15,7 @@ import setUserInfoReducer from "../features/users/userInfoSlice";
 import setUserPostReducer from "../features/users/userPostSlice";
 import setPostReducer from "../features/posts/PostsSlice";
 import setCommentReducer from "../features/posts/CommentsSlice";
+import setLikeReducer from "../features/posts/LikesSlice";
 
 // Configs
 const userInfoPersistConfig = {
@@ -32,6 +33,10 @@ const PostsPersistConfig = {
 };
 const CommentsPersistConfig = {
   key: "Comments",
+  storage,
+};
+const LikesPersistConfig = {
+  key: "Likes",
   storage,
 };
 // Wrap each reducer
@@ -54,6 +59,11 @@ const persistedCommentsReducer = persistReducer(
   setCommentReducer,
 );
 
+const persistedLikesReducer = persistReducer(
+  LikesPersistConfig,
+  setLikeReducer,
+);
+
 // Store
 export const store = configureStore({
   reducer: {
@@ -61,6 +71,7 @@ export const store = configureStore({
     UserPosts: persistedUserPostReducer,
     AllPost: persistedPostsReducer,
     AllComments: persistedCommentsReducer,
+    AllLikes: persistedLikesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
