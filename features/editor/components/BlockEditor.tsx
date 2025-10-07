@@ -1,9 +1,7 @@
 "use client";
 
-import { useCreateBlockNote } from "@blocknote/react";
-import { BlockNoteView } from "@blocknote/mantine";
+import { useEffect, useMemo, useState } from "react";
 import "@blocknote/mantine/style.css";
-import { useEffect, useMemo } from "react";
 
 export default function BlockEditor({
   onReady,
@@ -12,7 +10,18 @@ export default function BlockEditor({
   onReady?: (editor: any) => void;
   initialContent?: any; // BlockNote JSON
 }) {
-  // 👇 If initialContent exists, use it. Otherwise, fall back to defaults
+  const [editorModule, setEditorModule] = useState<any>(null);
+
+  // Dynamically import BlockNote modules
+  useEffect(() => {
+    (async () => {
+      const mod = await import("@blocknote/react");
+      const mantineMod = await import("@blocknote/mantine"); // optional if you need something from mantine
+      setEditorModule(mod);
+    })();
+  }, []);
+
+  // Memoize content
   const content = useMemo(
     () =>
       initialContent ?? [
@@ -20,28 +29,21 @@ export default function BlockEditor({
           id: "title-block",
           type: "heading",
           props: { level: 1 },
-          content: [
-            {
-              type: "text",
-              text: "Add your title here...",
-              styles: {},
-            },
-          ],
+          content: [{ type: "text", text: "Add your title here...", styles: {} }],
         },
         {
           id: "body-block",
           type: "paragraph",
-          content: [
-            {
-              type: "text",
-              text: "Start writing your story...",
-              styles: {},
-            },
-          ],
+          content: [{ type: "text", text: "Start writing your story...", styles: {} }],
         },
       ],
-    [initialContent],
+    [initialContent]
   );
+
+  if (!editorModule) return null; // wait until module loads
+
+  const { useCreateBlockNote } = editorModule;
+  const { BlockNoteView } = editorModule; // if you want, you can import mantine as separate dynamic import
 
   const editor = useCreateBlockNote({
     initialContent: content,

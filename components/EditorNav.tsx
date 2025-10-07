@@ -1,6 +1,5 @@
 "use client";
 
-import { signOut } from "next-auth/react";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import noimage from "../assets/picture.png";
 import bell from "../assets/bell.png";
@@ -35,21 +34,25 @@ export default function EditorNav({
 }) {
   const Data = useSelector((state: RootState) => state.UserInfo.list);
   const [drop, setDrop] = useState(false);
+
   async function handleClick() {
     try {
       const response = await axios.post(
         "/api/auth/logout",
         {},
-        { withCredentials: true },
+        { withCredentials: true }
       );
       if (response) {
-        {
-          store.dispatch(UserLogout());
-          persistor.purge();
-          signOut({ callbackUrl: "/" });
-        }
+        // Dynamically import signOut from next-auth/react
+        const { signOut } = await import("next-auth/react");
+
+        store.dispatch(UserLogout());
+        persistor.purge();
+        signOut({ callbackUrl: "/" });
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -83,11 +86,13 @@ export default function EditorNav({
             <div className="flex flex-col relative">
               <img
                 src={Data.image || noimage.src}
-                className={`size-8 hover:cursor-pointer rounded-full ${drop ? "scale-90" : ""} object-cover border-[1px] border-sky-100`}
+                className={`size-8 hover:cursor-pointer rounded-full ${drop ? "scale-90" : ""
+                  } object-cover border-[1px] border-sky-100`}
                 onClick={() => setDrop(!drop)}
               />
               <div
-                className={`w-40 p-2 h-60 absolute bg-sky-50 border-[1px] border-sky-100 flex flex-col items-start rounded-md -right-9 top-9 ${drop ? "visible" : "hidden"}`}
+                className={`w-40 p-2 h-60 absolute bg-sky-50 border-[1px] border-sky-100 flex flex-col items-start rounded-md -right-9 top-9 ${drop ? "visible" : "hidden"
+                  }`}
               >
                 <Link href="/profile">Profile</Link>
                 <button

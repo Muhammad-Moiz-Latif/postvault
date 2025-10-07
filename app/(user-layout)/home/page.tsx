@@ -1,17 +1,25 @@
-"use client";
+'use client';
 
 import Post from "@/features/posts/components/post-design";
 import { setUserInfo } from "@/features/users/userInfoSlice";
 import { RootState } from "@/state/store";
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const [session, setSession] = useState<any>(null);
   const PostsData = useSelector((state: RootState) => state.AllPost.list);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    async function loadSession() {
+      const { useSession } = await import("next-auth/react");
+      const { data } = useSession();
+      setSession(data);
+    }
+    loadSession();
+  }, []);
+
   useEffect(() => {
     if (session?.user) {
       dispatch(
@@ -25,10 +33,8 @@ export default function Home() {
   }, [session]);
 
   return (
-    <>
-      <div className="py-13 px-10">
-        <Post />
-      </div>
-    </>
+    <div className="py-13 px-10">
+      <Post />
+    </div>
   );
 }
