@@ -1,22 +1,19 @@
 import express from 'express';
 import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { UserTable } from './db/schema/users';
-
+import { router as authRoutes } from './modules/auth/auth.route';
 
 
 const app = express();
-const db = drizzle(process.env.DATABASE_URL!);
 
 
+//express middleware which parses incoming JSON data from req into json object and stored in req.body
+app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.status(200).json("How are you doing?");
-});
+
+app.use("/api/auth", authRoutes);
 
 const PORT = 4000;
 
-
 app.listen(PORT, async () => {
     console.log(`Server is listening on port ${PORT}`);
-})
+});
