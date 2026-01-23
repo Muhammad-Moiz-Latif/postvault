@@ -1,8 +1,12 @@
+import { relations } from "drizzle-orm";
 import { index } from "drizzle-orm/pg-core";
 import { pgEnum } from "drizzle-orm/pg-core";
 import { pgTable } from "drizzle-orm/pg-core";
+import { PostTable } from "./posts";
+import { CommentTable } from "./comments";
+import { likePostTable } from "./like.post";
+import { likeCommentTable } from "./like.comment";
 
-export const UserRole = pgEnum("userRole", ["ADMIN", "CLIENT"])
 export const AuthType = pgEnum("authType", ["GOOGLE", "CREDENTIALS"])
 
 export const UserTable = pgTable("users", (t) => ({
@@ -10,14 +14,18 @@ export const UserTable = pgTable("users", (t) => ({
     password: t.varchar("password", { length: 255 }),
     username: t.varchar("username", { length: 255 }).notNull(),
     email: t.varchar("email", { length: 255 }).unique().notNull(),
-    img: t.varchar("img").default(""),
-    role: UserRole("role").default("CLIENT").notNull(),
-    authType: AuthType("authType").default("CREDENTIALS").notNull(),
-    createdAt: t.timestamp("createdAt").defaultNow()
+    img: t.varchar("img").default(""), authType: AuthType("authType").default("CREDENTIALS").notNull(),
+    createdAt: t.timestamp("createdAt").defaultNow().notNull()
 }), table => {
     return {
-        emailIndex: index("emailIndex").on(table.email),
-        usernameIndex: index("usernameIndex").on(table.username),
-        idIndex: index("idIndex").on(table.id)
+        emailIndex: index("email_idx").on(table.email),
+        usernameIndex: index("username_idx").on(table.username),
     }
-})
+});
+
+export const userRelations = relations(UserTable, ({ many }) => ({
+    posts: many(PostTable),
+    comments: many(CommentTable),
+    post_likes: many(likePostTable),
+    comment_likes: many(likeCommentTable)
+}));
