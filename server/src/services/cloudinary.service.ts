@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary';
+import cloudinary from '../config/cloudinary';
 
 export default function uploadImage(buffer: Buffer): Promise<string> {
     //manually created promise

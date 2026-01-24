@@ -1,6 +1,7 @@
 import express from 'express';
 import 'dotenv/config';
 import { router as authRoutes } from './modules/auth/auth.route';
+import cookieParser from 'cookie-parser';
 
 
 const app = express();
@@ -8,6 +9,14 @@ const app = express();
 
 //express middleware which parses incoming JSON data from req into json object and stored in req.body
 app.use(express.json());
+
+//parses form data (converts string into js notation)
+app.use(express.urlencoded({extended : true}));
+
+//middleware for cookies
+app.use(cookieParser());
+
+
 
 
 app.use("/api/auth", authRoutes);

@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import "dotenv/config";
 import bcrypt from 'bcrypt';
+import { eq } from 'drizzle-orm';
 import { UserTable } from '../../db/schema/users';
 
 
@@ -14,9 +15,19 @@ export const authService = {
             email,
             password: hashedPassword,
             img: imgURL
-        }).returning({
-            userId: UserTable.id
-        });
+        }).returning();
         return createUser;
+    },
+
+    async verifyUser(email: string) {
+        const users = await db
+            .select()
+            .from(UserTable)
+            .where(eq(UserTable.email, email))
+            .limit(1);
+
+        const user = users[0];
+
+        return user;
     }
 };
