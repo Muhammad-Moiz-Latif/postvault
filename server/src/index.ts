@@ -1,6 +1,7 @@
 import express from 'express';
 import 'dotenv/config';
 import { router as authRoutes } from './modules/auth/auth.route';
+import { router as postRoutes } from './modules/post/post.routes';
 import cookieParser from 'cookie-parser';
 
 
@@ -10,8 +11,8 @@ const app = express();
 //express middleware which parses incoming JSON data from req into json object and stored in req.body
 app.use(express.json());
 
-//parses form data (converts string into js notation)
-app.use(express.urlencoded({extended : true}));
+//parses application/form-data only (converts string into js notation)
+app.use(express.urlencoded({ extended: true }));
 
 //middleware for cookies
 app.use(cookieParser());
@@ -20,6 +21,9 @@ app.use(cookieParser());
 
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/post", postRoutes);
+
 
 const PORT = 4000;
 

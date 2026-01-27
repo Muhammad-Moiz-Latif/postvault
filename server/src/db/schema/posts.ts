@@ -4,6 +4,7 @@ import { UserTable } from "./users";
 import { pgEnum } from "drizzle-orm/pg-core";
 import { index } from "drizzle-orm/pg-core";
 import { likePostTable } from "./like.post";
+import { CommentTable } from "./comments";
 
 export const PostStatus = pgEnum("postStatus", ["DRAFT", "PUBLISHED"]);
 
@@ -29,10 +30,11 @@ export const PostTable = pgTable("posts", (t) => ({
     }
 });
 
-export const postRelations = relations(PostTable, ({ one , many }) => ({
+export const postRelations = relations(PostTable, ({ one, many }) => ({
     author: one(UserTable, {
         fields: [PostTable.authorId],
         references: [UserTable.id]
     }),
+    comments: many(CommentTable),
     likes: many(likePostTable)
 }));
