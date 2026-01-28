@@ -14,4 +14,8 @@ router.post('/comment/:postId', verifyJWT, postController.commentOnPost);
 
 router.put('/edit/:postId', verifyJWT, upload.single("image"), postController.editPost);
 
+router.put('/edit/:commentId/:postId', verifyJWT, postController.editComment);
+
+router.delete('/delete/:commentId/:postId', verifyJWT, postController.deleteComment);
+
 router.delete('/delete/:postId', verifyJWT, postController.deletePost);

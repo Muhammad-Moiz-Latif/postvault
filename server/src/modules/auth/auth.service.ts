@@ -21,6 +21,17 @@ export const authService = {
         return createUser;
     },
 
+    async createGoogleUser(email: string, username: string, img: string) {
+        const createUser = await db.insert(UserTable).values({
+            username,
+            email,
+            img,
+            authType: "GOOGLE",
+            status: "VERIFIED"
+        }).returning();
+        return createUser[0];
+    },
+
     async findUserViaCredentials(name: string, email: string) {
         const findUser = await db.select().from(UserTable).where(or(
             eq(UserTable.username, name),
@@ -31,11 +42,24 @@ export const authService = {
         return theUser;
     },
 
-    async createVerificationToken(userId: string, randomOTP: string) {
+    async linkUserWithCredentialsAndGoogle(email: string, username: string, img: string) {
+        const linkedUser = await db.update(UserTable).set({
+            email,
+            username,
+            img,
+            authType: 'BOTH',
+            status: 'VERIFIED'
+        }).where(eq(UserTable.email, email)).returning();
+
+        return linkedUser[0];
+    },
+
+    async createVerificationToken(userId: string, randomOTP: string, type: "EMAIL_VERIFICATION" | "PASSWORD_RESET") {
         const tokens = await db.insert(verificationTokenTable).values({
             userId,
             token: randomOTP,
             createdAt: new Date(),
+            type,
             expiresAt: new Date(Date.now() + 15 * 60 * 1000) //15 minute's
         }).returning();
 
@@ -50,6 +74,24 @@ export const authService = {
             eq(verificationTokenTable.token, otp)
         ));
         return getToken;
+    },
+
+    async verifyResetToken(resetToken: string) {
+        const [getToken] = await db.select().from(verificationTokenTable).where(and(
+            eq(verificationTokenTable.token, resetToken),
+            eq(verificationTokenTable.type, 'PASSWORD_RESET'),
+        ));
+
+        return getToken;
+    },
+
+    async updatePassword(userId: string, password: string) {
+        const hashPassword = await bcrypt.hash(password, 10);
+        const [updatePassword] = await db.update(UserTable).set({
+            password: hashPassword
+        }).where(eq(UserTable.id, userId)).returning();
+
+        return updatePassword;
     },
 
     async getUserThroughEmailToken(tokenId: string) {
@@ -76,7 +118,9 @@ export const authService = {
         const users = await db
             .select()
             .from(UserTable)
-            .where(eq(UserTable.email, email))
+            .where(
+                eq(UserTable.email, email),
+            )
             .limit(1);
 
         const user = users[0];

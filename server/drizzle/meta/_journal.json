@@ -15,6 +15,20 @@
       "when": 1769531891972,
       "tag": "0001_large_lady_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769601237323,
+      "tag": "0002_parallel_mandroid",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1769602542460,
+      "tag": "0003_cynical_falcon",
+      "breakpoints": true
     }
   ]
 }

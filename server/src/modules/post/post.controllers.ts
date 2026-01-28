@@ -215,6 +215,70 @@ export const postController = {
         };
     },
 
+    async editComment(req: Request, res: Response) {
+        try {
+            const { comment } = req.body;
+            const commentId = req.params.commentId as string;
+            const postId = req.params.postId as string;
+
+            const editedComment = await postService.editComment(comment, postId, commentId);
+
+            if (editedComment) {
+                return res.status(200).json({
+                    success: true,
+                    message: "your comment has been edited successfully!!"
+                });
+            } else {
+                return res.status(400).json({
+                    sucess: false,
+                    message: "Unable to edit your comment"
+                });
+            };
+
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        };
+    },
+
+    async deleteComment(req: Request, res: Response) {
+        try {
+            const postId = req.params.postId as string;
+            const commentId = req.params.commentId as string;
+            const authorId = req.user?.id;
+
+            if (!authorId) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Forbidden"
+                });
+            };
+
+            const deletedComment = await postService.deleteComment(commentId, postId);
+
+            if (deletedComment) {
+                return res.status(200).json({
+                    success: true,
+                    message: "Deleted comment successfully",
+                    data: deletedComment
+                });
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "comment does not exist"
+                });
+            };
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                sucess: false,
+                message: "Internal server error"
+            });
+        };
+    },
 
 
 

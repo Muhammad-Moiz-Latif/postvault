@@ -8,7 +8,7 @@ import { likePostTable } from "./like.post";
 import { likeCommentTable } from "./like.comment";
 import { verificationTokenTable } from "./verify.token";
 
-export const AuthType = pgEnum("authType", ["GOOGLE", "CREDENTIALS"]);
+export const AuthType = pgEnum("authType", ["GOOGLE", "CREDENTIALS", "BOTH"]);
 
 export const AccountStatus = pgEnum("accountStatus", ["PENDING", "VERIFIED"]);
 

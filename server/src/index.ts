@@ -3,7 +3,10 @@ import 'dotenv/config';
 import { router as authRoutes } from './modules/auth/auth.route';
 import { router as postRoutes } from './modules/post/post.routes';
 import cookieParser from 'cookie-parser';
+import { configurePassport } from './config/passport';
+import passport from 'passport';
 
+configurePassport();
 
 const app = express();
 
@@ -17,8 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 //middleware for cookies
 app.use(cookieParser());
 
-
-
+// Initialize Passport
+app.use(passport.initialize());
 
 app.use("/api/auth", authRoutes);
 

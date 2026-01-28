@@ -59,7 +59,7 @@ export const postService = {
         const posts = await db.select().from(PostTable).leftJoin(
             CommentTable, eq(PostTable.id, CommentTable.postId)
         ).where(
-            eq(PostTable.status, 'PUBLISHED')
+            eq(PostTable.status, 'DRAFT')
         );
         return posts;
     },
@@ -73,8 +73,27 @@ export const postService = {
         }).returning();
 
         return commented;
-    }
+    },
 
+    async editComment(comment: string, postId: string, commentId: string) {
+        const [editComment] = await db.update(CommentTable).set({
+            text: comment
+        }).where(and(
+            eq(CommentTable.id, commentId),
+            eq(CommentTable.postId, postId)
+        )).returning();
+
+        return editComment;
+    },
+
+    async deleteComment(commentId: string, postId: string) {
+        const [deletedComment] = await db.delete(CommentTable).where(and(
+            eq(CommentTable.id, commentId),
+            eq(CommentTable.postId, postId)
+        )).returning();
+
+        return deletedComment;
+    }
 
 
 

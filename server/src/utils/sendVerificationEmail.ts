@@ -9,7 +9,8 @@ export async function sendVerificationEmail(userId: string, email: string) {
 
     const token = await authService.createVerificationToken(
         userId,
-        randomOTP.toString()
+        randomOTP.toString(),
+        "EMAIL_VERIFICATION"
     );
 
     if (!token) {
