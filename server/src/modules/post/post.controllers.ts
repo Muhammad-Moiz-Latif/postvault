@@ -113,6 +113,43 @@ export const postController = {
         };
     },
 
+    async getDetailedPost(req: Request, res: Response) {
+        try {
+            const postId = req.params.postId as string;
+            const authorId = req.user?.id;
+
+            if (!authorId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Forbidden"
+                });
+            };
+
+            const getPost = await postService.getPost(postId);
+
+            if (!getPost) {
+                return res.status(400).json({
+                    status: false,
+                    message: "Post does not exist"
+                });
+            } else {
+                return res.status(200).json({
+                    status: true,
+                    message: "Retrived post data successfully!!",
+                    data: getPost
+                });
+            };
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        };
+    },
+
+
     async deletePost(req: Request, res: Response) {
         try {
             const postId = req.params.postId as string;
@@ -165,9 +202,64 @@ export const postController = {
                 });
             };
         } catch (error) {
+            console.error(error);
             return res.status(500).json({
                 success: false,
                 message: "internal server error"
+            });
+        };
+    },
+
+    async likePost(req: Request, res: Response) {
+        try {
+            const postId = req.params.postId as string;
+            const authorId = req.user?.id;
+
+            if (!authorId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Authentication required'
+                });
+            };
+
+            const getPost = await postService.getPost(postId);
+
+            if (!getPost) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Post not found"
+                });
+            };
+
+            const existingLike = await postService.getLikedPost(authorId, postId);
+            //if user has already liked a post we remove it
+            if (existingLike && existingLike.id) {
+                const unlike = await postService.removeLikeFromPost(authorId, postId);
+                if (unlike) {
+                    return res.status(200).json({
+                        success: true,
+                        message: "Unliked post successfully",
+                        data: 'unliked'
+                    });
+                };
+            };
+
+            //else we like the post
+            const likePost = await postService.likePost(authorId, postId);
+
+            if (likePost) {
+                return res.status(201).json({
+                    success: true,
+                    message: "Liked the post successfully",
+                    action: 'liked'
+                });
+            };
+
+        } catch (error) {
+            console.error(error)
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error'
             });
         };
     },
@@ -280,7 +372,50 @@ export const postController = {
         };
     },
 
+    async likeComment(req: Request, res: Response) {
+        try {
+            const commentId = req.params.commentId as string;
+            const authorId = req.user?.id;
 
+            if (!authorId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Authentication required'
+                });
+            };
+
+            const existingLike = await postService.getLikedComment(authorId, commentId);
+            //if user has already liked a comment we remove it
+            if (existingLike && existingLike.id) {
+                const unlike = await postService.unlikeComment(authorId, commentId);
+                if (unlike) {
+                    return res.status(200).json({
+                        success: true,
+                        message: "Unliked comment successfully",
+                        data: 'unliked'
+                    });
+                };
+            };
+
+            //else we like the comment
+            const likeComment = await postService.likeComment(authorId, commentId);
+
+            if (likeComment) {
+                return res.status(201).json({
+                    success: true,
+                    message: "Liked the comment successfully",
+                    action: 'liked'
+                });
+            };
+
+        } catch (error) {
+            console.error(error)
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server error'
+            });
+        };
+    },
 
 
 };

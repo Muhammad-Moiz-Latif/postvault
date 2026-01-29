@@ -2,6 +2,7 @@ import express from 'express';
 import 'dotenv/config';
 import { router as authRoutes } from './modules/auth/auth.route';
 import { router as postRoutes } from './modules/post/post.routes';
+import { router as userRoutes } from './modules/user/user.route';
 import cookieParser from 'cookie-parser';
 import { configurePassport } from './config/passport';
 import passport from 'passport';
@@ -24,6 +25,8 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/user", userRoutes);
 
 app.use("/api/post", postRoutes);
 

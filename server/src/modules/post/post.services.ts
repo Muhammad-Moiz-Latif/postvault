@@ -1,8 +1,11 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import 'dotenv/config';
 import { PostTable } from '../../db/schema/posts';
 import { CommentTable } from '../../db/schema/comments';
+import { likeCommentTable } from '../../db/schema/like.comment';
+import { likePostTable } from '../../db/schema/like.post';
+import { UserTable } from '../../db/schema/users';
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -56,12 +59,60 @@ export const postService = {
     },
 
     async getAllPosts() {
-        const posts = await db.select().from(PostTable).leftJoin(
-            CommentTable, eq(PostTable.id, CommentTable.postId)
-        ).where(
-            eq(PostTable.status, 'DRAFT')
-        );
-        return posts;
+        const posts = await db.execute(sql`
+                SELECT
+                    p.id,
+                    p.title,
+                    p.paragraph,
+                    p.img,
+                    p.tags,
+                    json_build_object(
+                        'id', u.id,
+                        'username',u.username,
+                        'img',u.img          
+                    ) AS author,
+                    (
+                        SELECT COUNT(*) FROM
+                        comments c WHERE
+                        c."postId" = p.id
+                    ) AS commentCount,
+                    (
+                        SELECT COUNT(*) FROM likepost lp WHERE
+                        lp."postId" = p.id
+                    ) AS likeCount
+
+                    FROM posts p LEFT JOIN users u ON
+                    p."authorId" = u.id WHERE p.status = 'PUBLISHED'
+                    ORDER BY p."createdAt" DESC
+            `);
+        return posts.rows;
+    },
+
+    async removeLikeFromPost(authorId: string, postId: string) {
+        const [removeLike] = await db.delete(likePostTable).where(and(
+            eq(likePostTable.authorId, authorId),
+            eq(likePostTable.postId, postId)
+        )).returning();
+
+        return removeLike;
+    },
+
+    async getLikedPost(authorId: string, postId: string) {
+        const [liked] = await db.select().from(likePostTable).where(and(
+            eq(likePostTable.authorId, authorId),
+            eq(likePostTable.postId, postId)
+        ));
+        return liked;
+    },
+
+    async likePost(authorId: string, postId: string) {
+        const [likePost] = await db.insert(likePostTable).values({
+            authorId, postId
+        }).onConflictDoNothing({
+            target: [likePostTable.authorId, likePostTable.postId]
+        }).returning();
+
+        return likePost;
     },
 
     async commmentOnPost(authorId: string, postId: string, comment: string) {
@@ -93,8 +144,85 @@ export const postService = {
         )).returning();
 
         return deletedComment;
-    }
+    },
 
+    async getPost(postId: string) {
+
+        const result = await db.execute(sql`
+            SELECT
+                p.id,
+                p.title,
+                p.paragraph,
+                p."createdAt",
+
+                json_build_object(
+                    'username', u.username,
+                    'email', u.email,
+                    'img', u.img
+                ) AS author,
+
+                COALESCE(
+                    (
+                    SELECT json_agg(
+                        json_build_object(
+                        'id', c.id,
+                        'text', c.text,
+                        'createdAt', c."createdAt",
+                        'author', json_build_object(
+                            'username', cu.username,
+                            'email', cu.email,
+                            'img', cu.img
+                        ),
+                        'likes', (
+                            SELECT COUNT(*)
+                            FROM likecomment lc
+                            WHERE lc."commentId" = c.id
+                        )
+                        )
+                    )
+                    FROM comments c
+                    JOIN users cu ON cu.id = c."authorId"
+                    WHERE c."postId" = p.id
+                    ),
+                    '[]' :: json
+                ) AS comments
+
+                FROM posts p
+                JOIN users u ON u.id = p."authorId"
+                WHERE p.id = ${postId} ;
+        `);
+
+        return result.rows[0] || null;
+    },
+
+    async getLikedComment(authorId: string, commentId: string) {
+        const [comment] = await db.select().from(likeCommentTable).where(and(
+            eq(likeCommentTable.authorId, authorId),
+            eq(likeCommentTable.commentId, commentId)
+        ));
+
+        return comment;
+    },
+
+    async unlikeComment(authorId: string, commentId: string) {
+        const [comment] = await db.delete(likeCommentTable).where(and(
+            eq(likeCommentTable.authorId, authorId),
+            eq(likeCommentTable.commentId, commentId)
+        )).returning();
+
+        return comment;
+    },
+
+    async likeComment(authorId: string, commentId: string) {
+        const [comment] = await db.insert(likeCommentTable).values({
+            authorId,
+            commentId
+        }).onConflictDoNothing({
+            target: [likeCommentTable.authorId, likeCommentTable.commentId]
+        }).returning();
+
+        return comment;
+    },
 
 
 };

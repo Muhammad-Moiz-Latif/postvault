@@ -4,4 +4,8 @@ import { verifyJWT } from '../../middleware/verifyJWT';
 
 export const router = Router();
 
+
+router.get('/profile/:userId', verifyJWT, userController.getUserProfile);
+
 router.get('/posts', verifyJWT, userController.getUserPosts);
+

@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { UserTable } from '../../db/schema/users';
-import { eq, desc } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { PostTable } from '../../db/schema/posts';
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -17,11 +17,81 @@ export const userService = {
         return user;
     },
 
-    async getUserPosts(Userid: string) {
-        const posts = await db.select().from(PostTable).where(eq(
-            PostTable.authorId, Userid
-        )).orderBy(desc(PostTable.createdAt));
+    async getUserPosts(userId: string) {
+        const posts = await db.execute(sql`
+                SELECT 
+                    p.id,
+                    p.title,
+                    p.paragraph,
+                    p.img,
+                    p.tags,
+                    p.status,
+                    p."createdAt",
+                    p."updatedAt",
+                    p."publishedAt",
+                    (
+                        SELECT COUNT(*) FROM comments c WHERE
+                        c."postId" = p.id
+                    ) AS comments,
+                    (
+                        SELECT COUNT(*) FROM likepost lp where
+                        lp."postId" = p.id
+                    ) AS likes 
+                    FROM posts p WHERE p."authorId" = ${userId} ORDER BY p."createdAt" ASC
+            `);
 
-        return posts;
+        return posts.rows;
+    },
+
+    async getUserProfile(userId: string) {
+        const result = await db.execute(sql`
+            SELECT
+                u.id,
+                u.username,
+                u.email,
+                u.img,
+                u."createdAt",
+
+                -- liked posts
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', p.id,
+                                'title', p.title,
+                                'paragraph', p.paragraph,
+                                'img', p.img,
+                                'likedAt', lp."createdAt"
+                            )
+                        )
+                        FROM likepost lp
+                        JOIN posts p ON p.id = lp."postId"
+                        WHERE lp."authorId" = u.id
+                    ),
+                    '[]'::json
+                ) AS liked_posts,
+
+                -- liked comments
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', c.id,
+                                'text', c.text,
+                                'likedAt', lc."createdAt"
+                            )
+                        )
+                        FROM likecomment lc
+                        JOIN comments c ON c.id = lc."commentId"
+                        WHERE lc."authorId" = u.id
+                    ),
+                    '[]'::json
+                ) AS liked_comments
+
+            FROM users u
+            WHERE u.id = ${userId};          
+            `);
+
+        return result.rows[0] || null;
     },
 }

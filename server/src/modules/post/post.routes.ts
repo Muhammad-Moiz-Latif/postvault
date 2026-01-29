@@ -8,14 +8,23 @@ export const router = Router();
 
 router.get('/all-posts', postController.getAllPosts);
 
+router.get('/:postId', verifyJWT, postController.getDetailedPost);
+
 router.post('/create', verifyJWT, upload.single("image"), postController.createPost);
 
-router.post('/comment/:postId', verifyJWT, postController.commentOnPost);
-
 router.put('/edit/:postId', verifyJWT, upload.single("image"), postController.editPost);
+
+router.delete('/delete/:postId', verifyJWT, postController.deletePost);
+
+router.post('/like/:postId', verifyJWT, postController.likePost);
+
+router.post('/comment/:postId', verifyJWT, postController.commentOnPost);
 
 router.put('/edit/:commentId/:postId', verifyJWT, postController.editComment);
 
 router.delete('/delete/:commentId/:postId', verifyJWT, postController.deleteComment);
 
-router.delete('/delete/:postId', verifyJWT, postController.deletePost);
+router.post('/like-comment/:commentId', verifyJWT, postController.likeComment);
+
+
+
