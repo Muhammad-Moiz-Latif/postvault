@@ -126,6 +126,17 @@ export const postService = {
         return commented;
     },
 
+    async replyToComment(authorId: string, parentId: string, postId: string, comment: string) {
+        const [reply] = await db.insert(CommentTable).values({
+            authorId,
+            parentId,
+            postId,
+            text: comment
+        }).returning();
+
+        return reply;
+    },
+
     async editComment(comment: string, postId: string, commentId: string) {
         const [editComment] = await db.update(CommentTable).set({
             text: comment
@@ -161,6 +172,12 @@ export const postService = {
                     'img', u.img
                 ) AS author,
 
+                (
+                    SELECT COUNT(*)
+                    FROM likepost lp
+                    WHERE lp."postId" = p.id
+                ) AS likes,
+
                 COALESCE(
                     (
                     SELECT json_agg(
@@ -177,12 +194,38 @@ export const postService = {
                             SELECT COUNT(*)
                             FROM likecomment lc
                             WHERE lc."commentId" = c.id
+                        ),
+                        'replies', (
+                            COALESCE(
+                                (
+                                SELECT json_agg(
+                                    json_build_object(
+                                        'id', rc.id,
+                                        'text', rc.text,
+                                        'createdAt', rc."createdAt",
+                                        'author', json_build_object(
+                                            'username', rcu.username,
+                                            'email', rcu.email,
+                                            'img', rcu.img
+                                         ),
+                                        'likes', (
+                                            SELECT COUNT(*)
+                                            FROM likecomment lc
+                                            WHERE lc."commentId" = c.id
+                                        )
+                                    )
+                                ) FROM comments rc
+                                  JOIN users rcu
+                                  ON rc."authorId" = rcu.id
+                                  WHERE rc."parentId" = c.id
+                            ), '[]' :: json )
                         )
-                        )
+                        ) ORDER BY c."createdAt"
                     )
                     FROM comments c
                     JOIN users cu ON cu.id = c."authorId"
                     WHERE c."postId" = p.id
+                    AND c."parentId" IS NULL
                     ),
                     '[]' :: json
                 ) AS comments

@@ -12,7 +12,7 @@ export const CommentTable = pgTable("comments", (t) => ({
     parentId: t.uuid("parentId").references((): any => CommentTable.id, { onDelete: "cascade" }),
     text: t.text("text").notNull(),
     createdAt: t.timestamp("createdAt").defaultNow(),
-    updatedAt: t.timestamp("updatedAt").defaultNow(),
+    updatedAt: t.timestamp("updatedAt").defaultNow(), 
 }), table => ({
     commentIndex: index("comment_idx").on(table.id)
 }));

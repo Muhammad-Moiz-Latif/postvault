@@ -307,6 +307,50 @@ export const postController = {
         };
     },
 
+    async replyToAComment(req: Request, res: Response) {
+        try {
+            const parentId = req.params.parentId as string;
+            const postId = req.params.postId as string;
+            const { comment } = req.body;
+            const authorId = req.user?.id;
+
+            if (!comment) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Comment is required"
+                });
+            };
+
+            if (!authorId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'User not Authorized'
+                });
+            };
+
+            const reply = await postService.replyToComment(authorId, parentId, postId, comment);
+
+            if (reply) {
+                return res.status(201).json({
+                    success: true,
+                    message: "reply made successfully!!",
+                    data: reply
+                });
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "could not reply to the comment"
+                });
+            };
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        };
+    },
+
     async editComment(req: Request, res: Response) {
         try {
             const { comment } = req.body;
