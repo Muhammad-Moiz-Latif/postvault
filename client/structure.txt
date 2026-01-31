@@ -1,0 +1,59 @@
+client/src/
+├── features/              # Feature-based modules
+│   ├── auth/
+│   │   ├── components/    # Login, Signup, VerifyEmail, ForgotPassword
+│   │   ├── hooks/         # useAuth, useGoogleAuth
+│   │   ├── services/      # authApi.ts (API calls)
+│   │   └── types/         # auth.types.ts
+│   ├── posts/
+│   │   ├── components/    # PostCard, PostDetail, CreatePost, CommentSection
+│   │   ├── hooks/         # usePosts, usePostActions
+│   │   ├── services/      # postApi.ts
+│   │   └── types/         # post.types.ts
+│   └── user/
+│       ├── components/    # UserProfile, UserPosts
+│       ├── hooks/         # useUserProfile
+│       └── services/      # userApi.ts
+│
+├── shared/               # Shared across features
+│   ├── components/       # Button, Input, Modal, Navbar, Card
+│   ├── hooks/            # useLocalStorage, useDebounce
+│   ├── utils/            # formatDate, validation helpers
+│   └── constants/        # API_BASE_URL, routes constants
+│
+├── layouts/              # Layout wrappers
+│   ├── AuthLayout.tsx    # For login/signup pages
+│   ├── MainLayout.tsx    # For authenticated pages (with navbar)
+│   └── ProfileLayout.tsx
+│
+├── pages/                # Route-level components
+│   ├── HomePage.tsx
+│   ├── LoginPage.tsx
+│   ├── SignupPage.tsx
+│   ├── PostDetailPage.tsx
+│   ├── CreatePostPage.tsx
+│   └── ProfilePage.tsx
+│
+├── lib/                  # External libraries config
+│   ├── axios.ts          # Axios instance with interceptors
+│   └── queryClient.ts    # React Query config
+│
+├── store/                # State management (Zustand/Redux)
+│   ├── authStore.ts      # Auth state
+│   └── uiStore.ts        # UI state (modals, toasts)
+│
+└── routes.tsx            # Route definitions
+
+
+
+/ (public)
+├── /login
+├── /signup
+├── /verify-email
+├── /forgot-password
+├── /reset-password
+└── /feed (protected) ← MainLayout
+    ├── /
+    ├── /post/:id
+    ├── /create
+    └── /profile/:userId
