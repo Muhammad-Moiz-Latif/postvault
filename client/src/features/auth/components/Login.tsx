@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import useLogin from '../queries/useLogin'
+
+
 
 const loginSchema = z.object({
     email: z.email("Please enter a valid email")
@@ -12,7 +15,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>
 
-export default function Login() {
+export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogin: React.Dispatch<React.SetStateAction<boolean>> }) {
     const {
         register,
         handleSubmit,
@@ -23,21 +26,36 @@ export default function Login() {
     });
 
 
-
     const onSubmit: SubmitHandler<LoginForm> = async (data) => {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        console.log(data);
+        const { mutate, isError, isPending } = useLogin();
+        mutate(data);
         reset();
     }
 
     return (
-        <div className="w-full h-screen flex justify-center items-center bg-gray-50">
+        <div className="w-full h-screen flex flex-col justify-center items-center">
+
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-8 shadow-sm"
+                className="w-full max-w-md "
             >
-                <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+                <div className="flex gap-3 justify-center">
+                    <button
+                        type='button'
+                        onClick={() => setLogin(true)}
+                        className={`hover:cursor-pointer ${isLogin && "bg-black text-white"}  w-20 h-8 rounded-[4px]`}
+                    >
+                        Login
+                    </button>
+
+                    <button
+                        type='button'
+                        onClick={() => setLogin(false)}
+                        className={`hover:cursor-pointer ${!isLogin && "bg-black text-white"}  w-20 h-8 rounded-[4px]`}
+                    >
+                        Signup
+                    </button>
+                </div>
 
                 {/* Email Field */}
                 <div className="mb-4">
@@ -85,4 +103,4 @@ export default function Login() {
             </form>
         </div>
     )
-}
+};

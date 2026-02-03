@@ -6,12 +6,18 @@ export const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     //header = Bearer ${token}
     const header = req.header('authorization');
     if (!header) {
-        return res.status(401);
+        return res.status(401).json({
+            success: false,
+            message: 'No authorization header'
+        });
     };
     const token = header.split(" ")[1];
     jwt.verify(token, process.env.access_secret!, (err, decoded) => {
         if (err || !decoded || typeof decoded === "string") {
-            return res.sendStatus(403);
+            return res.status(403).json({
+                success: false,
+                message: 'Token invalid or expired'
+            });
         }
 
         req.user = {

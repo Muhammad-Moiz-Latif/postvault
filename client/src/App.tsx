@@ -1,8 +1,14 @@
+import { Outlet } from "react-router";
+import { useAxiosInterceptors } from "./hooks/useAxiosInterceptors";
+
 export default function App() {
+  useAxiosInterceptors();
 
   return (
     <>
-      <div>How ya doing?</div>
+      <div className="w-screen min-h-screen">
+        <Outlet/>
+      </div>
     </>
   )
 };
