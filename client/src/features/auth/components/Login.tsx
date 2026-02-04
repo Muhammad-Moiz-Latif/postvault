@@ -2,6 +2,10 @@ import { z } from 'zod'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import useLogin from '../queries/useLogin'
+import { useAuth } from '../../../context/authContext';
+import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router';
+import { useState } from 'react';
 
 
 
@@ -11,30 +15,43 @@ const loginSchema = z.object({
     password: z.string()
         .min(1, "Password is required")
         .min(8, "Password must be at least 8 characters"),
-})
+});
 
-type LoginForm = z.infer<typeof loginSchema>
+export type LoginForm = z.infer<typeof loginSchema>
 
 export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogin: React.Dispatch<React.SetStateAction<boolean>> }) {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting },
-        reset
-    } = useForm<LoginForm>({
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<LoginForm>({
         resolver: zodResolver(loginSchema)
     });
+    const { mutate, isPending } = useLogin();
+    const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState("");
+    const { setAuth } = useAuth();
+
 
 
     const onSubmit: SubmitHandler<LoginForm> = async (data) => {
-        const { mutate, isError, isPending } = useLogin();
-        mutate(data);
-        reset();
+        mutate(data, {
+            onSuccess: (response) => {
+                if (response.success) {
+                    setAuth({ access_token: response.access_token!, user_id: response.data._id });
+                    setTimeout(() => {
+                        toast.success(response.message);
+                        reset();
+                    }, 2000);
+                    navigate('/api');
+                };
+            },
+            onError: (error: any) => {
+                setErrorMessage(error.response.data.message);
+                console.error("Signup error in component:", error);
+            }
+        });
     }
 
     return (
         <div className="w-full h-screen flex flex-col justify-center items-center">
-
+            <ToastContainer />
             <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full max-w-md "
@@ -56,6 +73,8 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                         Signup
                     </button>
                 </div>
+
+                {errorMessage && <h1 className="text-red-600">{errorMessage}</h1>}
 
                 {/* Email Field */}
                 <div className="mb-4">
@@ -95,10 +114,10 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                 {/* Submit Button */}
                 <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                    disabled={isPending}
+                    className="w-full hover:cursor-pointer bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
                 >
-                    {isSubmitting ? 'Logging in...' : 'Login'}
+                    {isPending ? 'Logging in...' : 'Login'}
                 </button>
             </form>
         </div>

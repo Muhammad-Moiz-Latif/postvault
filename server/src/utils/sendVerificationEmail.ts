@@ -1,7 +1,15 @@
 import { authService } from "../modules/auth/auth.service";
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
+import 'dotenv/config';
 
-const resend = new Resend(process.env.resend_api_key);
+export const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
+
 
 export async function sendVerificationEmail(userId: string, email: string) {
 
@@ -17,9 +25,9 @@ export async function sendVerificationEmail(userId: string, email: string) {
         throw new Error("Failed to create verification token");
     }
 
-    const { error } = await resend.emails.send({
-        from: "Postvault <onboarding@resend.dev>",
-        to: [email],
+    const { rejected } = await transporter.sendMail({
+        from: `PostVault <${process.env.EMAIL_USER}>`,
+        to: email,
         subject: "Email Verification",
         html: `
                 <!DOCTYPE html>
@@ -45,7 +53,8 @@ export async function sendVerificationEmail(userId: string, email: string) {
                 `
     });
 
-    if (error) {
+    if (rejected.length > 0) {
+        console.error("Rejected recipients:", rejected);
         throw new Error("Failed to send email");
     }
 

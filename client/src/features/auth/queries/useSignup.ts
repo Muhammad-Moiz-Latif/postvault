@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { login } from "../apis/login";
+import { signup } from "../apis/signup";
 
 
-export default function useLogin() {
+export function useSignup() {
     return useMutation({
-        mutationFn: login,
+        mutationFn: signup,
         onError: (error) => {
             console.error(error);
         }

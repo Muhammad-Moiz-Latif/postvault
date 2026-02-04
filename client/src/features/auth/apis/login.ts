@@ -1,13 +1,10 @@
 import { publicApi } from "../../../app/axios";
-
-type LoginForm = {
-  email: string;
-  password: string;
-};
+import { type LoginResponse } from "../../types";
+import type { LoginForm } from "../components/Login";
 
 
 export async function login(formData: LoginForm) {
-  const response = await publicApi.post(
+  const response = await publicApi.post<LoginResponse>(
     "/api/auth/login",
     formData
   );

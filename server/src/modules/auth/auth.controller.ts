@@ -4,12 +4,10 @@ import "dotenv/config";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { authService } from './auth.service';
-import { Resend } from 'resend';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '../../utils/sendVerificationEmail';
 import { sendResetEmail } from '../../utils/sendResetEmail';
 
-const resend = new Resend(process.env.resend_api_key);
 
 export const authController = {
 
@@ -338,6 +336,7 @@ export const authController = {
                 success: true,
                 message: "User verified successfully!",
                 data: {
+                    _id: findUser.id,
                     username: findUser.username,
                     img: findUser.img,
                     email: findUser.email,

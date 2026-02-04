@@ -1,13 +1,11 @@
-import { authService } from "../modules/auth/auth.service";
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.resend_api_key);
+import 'dotenv/config';
+import { transporter } from './sendVerificationEmail';
 
 export async function sendResetEmail(username: string, email: string, resetLink: string) {
     try {
-        const { error } = await resend.emails.send({
-            from: "Postvault <onboarding@resend.dev>",
-            to: [email],
+        const { rejected } = await transporter.sendMail({
+            from: `PostVault <${process.env.EMAIL_USER}>`,
+            to: email,
             subject: 'Reset Your Password',
             html: `
                     <h2>Hi ${username},</h2>
@@ -33,8 +31,8 @@ export async function sendResetEmail(username: string, email: string, resetLink:
                 `
         });
 
-        if (error) {
-            console.error(error);
+        if (rejected.length > 0) {
+            console.error("Rejected recipients:", rejected);
             throw new Error("Failed to send email");
         }
 

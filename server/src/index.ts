@@ -5,12 +5,16 @@ import { router as postRoutes } from './modules/post/post.routes';
 import { router as userRoutes } from './modules/user/user.route';
 import cookieParser from 'cookie-parser';
 import { configurePassport } from './config/passport';
+import cors from 'cors';
 import passport from 'passport';
 
 configurePassport();
 
 const app = express();
 
+app.use(cors({
+    origin: 'http://localhost:5173'
+}));
 
 //express middleware which parses incoming JSON data from req into json object and stored in req.body
 app.use(express.json());
