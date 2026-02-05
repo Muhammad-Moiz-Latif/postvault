@@ -6,6 +6,7 @@ import { useAuth } from '../../../context/authContext';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
 import { useState } from 'react';
+import EnterEmail from './ui/input-email';
 
 
 
@@ -23,6 +24,7 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
     const { register, handleSubmit, formState: { errors }, reset } = useForm<LoginForm>({
         resolver: zodResolver(loginSchema)
     });
+    const [isReset, setReset] = useState(false);
     const { mutate, isPending } = useLogin();
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState("");
@@ -34,12 +36,12 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
         mutate(data, {
             onSuccess: (response) => {
                 if (response.success) {
+                    toast.success(response.message);
                     setAuth({ access_token: response.access_token!, user_id: response.data._id });
+                    reset();
                     setTimeout(() => {
-                        toast.success(response.message);
-                        reset();
-                    }, 2000);
-                    navigate('/api');
+                        navigate('/app');
+                    }, 1500);
                 };
             },
             onError: (error: any) => {
@@ -51,7 +53,19 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
 
     return (
         <div className="w-full h-screen flex flex-col justify-center items-center">
-            <ToastContainer />
+            <ToastContainer
+                position='top-center'
+                closeOnClick
+                draggable
+                hideProgressBar={true}
+            />
+            {/* EMAIL VERIFICATION LOGIN */}
+            {isReset &&
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />}
+
+            {isReset && <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <EnterEmail setReset={setReset} />
+            </div>}
             <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="w-full max-w-md "
@@ -107,9 +121,16 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                             }`}
                     />
                     {errors.password && (
-                        <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                        <p className="text-red-500 text-sm">{errors.password.message}</p>
                     )}
                 </div>
+                <button
+                    type='button'
+                    className='text-xs text-end w-full tracking-tight mb-2 hover:cursor-pointer'
+                    onClick={() => setReset((prev) => !prev)}
+                >
+                    Forgot password
+                </button>
 
                 {/* Submit Button */}
                 <button

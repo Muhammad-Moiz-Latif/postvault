@@ -1,25 +1,44 @@
 // src/layouts/MainLayout.tsx
 import { Outlet, Link, useNavigate } from "react-router";
-import { useAuth } from "../context/authContext";
+import { useLogout } from "../features/auth/queries/useLogout";
+import { toast, ToastContainer } from 'react-toastify';
 
 export const MainLayout = () => {
-    const { auth, setAuth } = useAuth();
+    const { mutate, isPending } = useLogout();
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        setAuth({ access_token: "" , user_id : ''});
-        navigate('/');
+        mutate(undefined, {
+            onSuccess: (response) => {
+                if (response.success) {
+                    toast.success("Logged out successfully");
+                    setTimeout(() => {
+                        navigate('/auth');
+                    }, 1500);
+                }
+            },
+            onError: (error) => {
+                console.error(error, 'error');
+                toast.error('Unable to logout');
+            }
+        });
     };
 
     return (
         <div className="w-screen min-h-screen flex flex-col bg-gray-50">
             {/* App Navbar - different from public navbar */}
+            <ToastContainer
+                position='top-center'
+                closeOnClick
+                draggable
+                hideProgressBar={true}
+            />
             <nav className="bg-blue-600 text-white p-4 shadow-lg">
                 <div className="container mx-auto flex justify-between items-center">
                     <Link to="/app" className="text-2xl font-bold">
                         BlogApp
                     </Link>
-                    
+
                     <div className="flex gap-6 items-center">
                         <Link to="/app" className="hover:text-blue-200">
                             Home
@@ -36,12 +55,13 @@ export const MainLayout = () => {
                         <Link to="/app/profile" className="hover:text-blue-200">
                             Profile
                         </Link>
-                        
-                        <button 
+
+                        <button
                             onClick={handleLogout}
-                            className="px-4 py-2 bg-red-500 rounded-lg hover:bg-red-600"
+                            disabled={isPending}
+                            className="px-4 py-2 bg-red-500 rounded-lg hover:bg-red-600 hover:cursor-pointer"
                         >
-                            Logout
+                            {isPending ? "Logging out..." : "Logout"}
                         </button>
                     </div>
                 </div>

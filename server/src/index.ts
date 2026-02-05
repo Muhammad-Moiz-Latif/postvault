@@ -13,7 +13,8 @@ configurePassport();
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:5173'
+    origin: 'http://localhost:5173',
+    credentials: true
 }));
 
 //express middleware which parses incoming JSON data from req into json object and stored in req.body
