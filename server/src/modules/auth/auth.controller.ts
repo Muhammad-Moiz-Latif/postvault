@@ -119,7 +119,7 @@ export const authController = {
             // Redirect to frontend with token
             // You can't send JSON on a redirect, so pass token as query param
             // Or redirect to a success page that handles the token
-            const redirectUrl = `${process.env.FRONTEND_URL}/auth/success?token=${access_token}`;
+            const redirectUrl = `${process.env.FRONTEND_URL}/auth/success?token=${access_token}&userId=${user.id}`;
             return res.redirect(redirectUrl);
 
         } catch (error) {

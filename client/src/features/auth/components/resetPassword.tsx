@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router"
 import z from "zod";
 import { useReset } from "../queries/useReset";
 import { toast, ToastContainer } from 'react-toastify';
+import password from '../../../assets/password.png';
 
 
 const resetPasswordSchema = z.object({
@@ -63,52 +64,57 @@ export const ResetPassword = () => {
     };
 
     return (
-        <div className="w-full h-screen flex justify-center items-center">
+        <div className="w-full h-screen flex flex-col gap-3 justify-center items-center">
             <ToastContainer
                 position='top-center'
                 closeOnClick
                 draggable
                 hideProgressBar={true}
             />
-            <form
-                className="w-1/2 h-1/2 rounded-[4px] border border-zinc-300 p-3 flex flex-col justify-evenly items-center"
-                onSubmit={handleSubmit(onSubmit)}
-
-            >
-                <h1>Reset your password</h1>
-
-                {errorMessage && <h1 className="text-red-600">{errorMessage}</h1>}
-
-
-                {/* ENTER PASSWORD */}
-                <input
-                    {...register('password')}
-                    className="w-full outline-0 h-9 rounded-[6px] bg-zinc-500 text-sm p-2"
-                    type="password"
-                    placeholder="Password"
-                />
-                <h1 className="text-red-500 text-sm">
-                    {errors.password?.message}
-                </h1>
-
-                {/* ENTER CONFIRMATION PASSWORD */}
-                <input
-                    {...register('confirm_password')}
-                    className="w-full outline-0 h-9 rounded-[6px] bg-zinc-500 text-sm p-2"
-                    type="password"
-                    placeholder="Confirm password"
-                />
-                <h1 className="text-red-500 text-sm">
-                    {errors.confirm_password?.message}
-                </h1>
-
-                {/* SUBMIT BUTTON */}
+            <div className="border border-zinc-200 rounded-md p-1.5">
+                <img src={password} className="size-5" />
+            </div>
+            <h1 className="font-sans text-2xl tracking-tight">Set new password</h1>
+            <p className="font-sans text-sm tracking-tight text-zinc-500">Must be at least 8 characters</p>
+            <form className="mb-4 flex flex-col w-1/2 px-7" onSubmit={handleSubmit(onSubmit)}>
+                <div className="mb-2">
+                    <label htmlFor="password" className="block text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
+                        Password
+                    </label>
+                    <input
+                        id="password"
+                        type="password"
+                        {...register("password")}
+                        placeholder="Enter your password"
+                        className={`w-full px-4 py-2 text-sm border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.password ? 'border-destructive' : 'border-border'
+                            }`}
+                    />
+                    {errors.password && (
+                        <p className="text-destructive text-xs tracking-tight mt-1 font-sans">{errors.password.message}</p>
+                    )}
+                </div>
+                <div className="mb-2">
+                    <label htmlFor="password" className="block text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
+                        Confirm password
+                    </label>
+                    <input
+                        id="confirm_password"
+                        type="password"
+                        {...register("confirm_password")}
+                        placeholder="Confirm your password"
+                        className={`w-full px-4 py-2 text-sm border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.confirm_password ? 'border-destructive' : 'border-border'
+                            }`}
+                    />
+                    {errors.confirm_password && (
+                        <p className="text-destructive text-xs mt-1 tracking-tight font-sans">{errors.confirm_password.message}</p>
+                    )}
+                </div>
                 <button
                     type="submit"
-                    // disabled={isPending}
-                    className="bg-black text-white hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50"
+                    disabled={isPending}
+                    className="w-full text-sm hover:cursor-pointer bg-primary text-primary-foreground py-2 rounded-[6px] font-medium hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed transition font-sans"
                 >
-                    {isPending ? "Resetting..." : "Reset password"}
+                    {isPending ? 'Resetting...' : 'Reset password'}
                 </button>
             </form>
         </div>

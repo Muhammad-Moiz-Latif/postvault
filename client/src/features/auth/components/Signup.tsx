@@ -5,6 +5,10 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import z from "zod";
 import { VerifyEmail } from "./verifyEmail";
 import { useSignup } from "../queries/useSignup";
+import logo from '../../../assets/logo.png';
+import google from '../../../assets/google.png';
+import bg from '../../../assets/login_bg.jpg';
+
 
 const signupSchema = z.object({
     username: z.string().min(8, "Minimum 8 characters are required").max(25, "username is too long"),
@@ -30,9 +34,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
     const [errorMessage, setErrorMessage] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const { mutate, isPending } = useSignup();
-    const { handleSubmit, register, watch, reset, formState: {
-        errors
-    } } = useForm<signupType>({
+    const { handleSubmit, register, watch, reset, formState: { errors } } = useForm<signupType>({
         resolver: zodResolver(signupSchema)
     });
 
@@ -69,115 +71,136 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
     }
 
     return (
-        <div className="flex relative gap-3 w-full h-full justify-center items-center">
-
-            {/* EMAIL VERIFICATION LOGIN */}
-            {showVerifyModal &&
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />}
+        <div className="flex w-full h-screen p-3 justify-center items-center bg-background">
+            {showVerifyModal && <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40" />}
 
             {showVerifyModal && <div className="fixed inset-0 z-50 flex items-center justify-center">
                 <VerifyEmail tokenId={verificationTokenId} setVerifyModal={setShowVerifyModal} setIsLogin={setLogin} />
             </div>}
 
-
-            {/* SIGNUP FORM */}
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="w-[80vh] h-[90vh] bg-zinc-50 rounded-[10px] border border-zinc-300 p-3 flex flex-col items-center gap-3">
-
-                <div className="flex gap-4 justify-center">
-                    <button
-                        type="button"
-                        onClick={() => setLogin(true)}
-                        className={`hover:cursor-pointer ${isLogin && "bg-black text-white"} w-20 h-8 rounded-[4px]`}
-                    >
-                        Login
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => setLogin(false)}
-                        className={`hover:cursor-pointer ${!isLogin && "bg-black text-white"} w-20 h-8 rounded-[4px]`}
-                    >
-                        Signup
-                    </button>
+            <div className='w-full h-full rounded-2xl border border-primary/40 relative'>
+                <img src={bg} className='size-full rounded-2xl' />
+                <h1 className='absolute bottom-10 left-3 font-serif text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
+                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-lg'>Write stories, notes, and ideas without distraction.</p>
+            </div>
+            <div className='w-full h-full flex flex-col justify-start pt-15 items-center relative'>
+                <div className='flex gap-1 justify-center items-center absolute top-3 left-5'>
+                    <img src={logo} className='size-6' />
+                    <h1 className='font-sans text-xl tracking-tight'>PostVault</h1>
                 </div>
-                {/* Profile Picture Upload */}
-                <label htmlFor="profile-picture" className="cursor-pointer">
-                    <div className="size-24 rounded-full bg-zinc-300 flex items-center justify-center overflow-hidden border-4 border-zinc-400 hover:border-blue-500 transition-all">
-                        {previewUrl ? (
-                            <img
-                                src={previewUrl}
-                                alt="Profile preview"
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="text-4xl text-zinc-600">
-                                📷
-                            </div>
-                        )}
+                <div className='mb-4'>
+                    <h1 className='text-center tracking-tight text-2xl font-sans text-foreground'>Create account</h1>
+                    <p className='text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign up.</p>
+                </div>
+
+                <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md">
+                    <div className="flex justify-center items-center bg-muted mx-20 p-0.75 rounded-[4px] mb-4">
+                        <button
+                            type='button'
+                            onClick={() => setLogin(true)}
+                            className={`hover:cursor-pointer tracking-tight font-sans ${isLogin ? "bg-primary text-primary-foreground" : "bg-zinc-300 text-secondary-foreground"} w-full h-8 rounded-l-[4px]`}
+                        >
+                            Login
+                        </button>
+                        <button
+                            type='button'
+                            onClick={() => setLogin(false)}
+                            className={`hover:cursor-pointer tracking-tight font-sans ${!isLogin ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"} w-full h-8 rounded-r-[4px]`}
+                        >
+                            Signup
+                        </button>
                     </div>
-                    <input
-                        {...register("image")}
-                        id="profile-picture"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                    />
-                </label>
-                <h1 className="text-red-500 text-sm">{errors.image && errors.image.message}</h1>
-                {errorMessage && <h1 className="text-red-600">{errorMessage}</h1>}
 
+                    <div className="flex justify-center mb-1.5">
+                        <label htmlFor="profile-picture" className="cursor-pointer">
+                            <div className="size-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border hover:border-primary transition-all">
+                                {previewUrl ? (
+                                    <img src={previewUrl} alt="Profile preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="text-xl">📷</div>
+                                )}
+                            </div>
+                            <input
+                                {...register("image")}
+                                id="profile-picture"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                            />
+                        </label>
+                    </div>
+                    {errors.image && <p className="text-destructive text-xs text-center mb-2 font-sans">{errors.image.message}</p>}
+                    {errorMessage && <p className="text-destructive text-xs text-center mb-2 font-sans">{errorMessage}</p>}
 
-                {/* ENTER USERNAME */}
-                <input
-                    {...register("username")}
-                    className="w-full outline-0 h-8 rounded-[6px] bg-zinc-500 text-sm p-2"
-                    type="text"
-                    placeholder="Username"
-                />
-                <h1 className="text-red-500 text-sm">{errors.username && errors.username.message}</h1>
+                    <div className="grid grid-cols-2 gap-2.5 mb-3">
+                        <div>
+                            <input
+                                {...register("username")}
+                                className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                type="text"
+                                placeholder="Enter your username"
+                            />
+                            {errors.username && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.username.message}</p>}
+                        </div>
 
-                {/* ENTER EMAIL */}
-                <input
-                    {...register("email")}
-                    className="w-full outline-0 h-8 rounded-[6px] bg-zinc-500 text-sm p-2"
-                    type="email"
-                    placeholder="Email"
-                />
-                <h1 className="text-red-500 text-sm">{errors.email && errors.email.message}</h1>
+                        <div>
+                            <input
+                                {...register("email")}
+                                className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                type="email"
+                                placeholder="Enter your email address"
+                            />
+                            {errors.email && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.email.message}</p>}
+                        </div>
 
-                {/* ENTER PASSWORD */}
-                <input
-                    {...register('password')}
-                    className="w-full outline-0 h-8 rounded-[6px] bg-zinc-500 text-sm p-2"
-                    type="password"
-                    placeholder="Password"
-                />
-                <h1 className="text-red-500 text-sm">
-                    {errors.password?.message}
-                </h1>
+                        <div>
+                            <input
+                                {...register('password')}
+                                className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                type="password"
+                                placeholder="Enter your password"
+                            />
+                            {errors.password && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.password.message}</p>}
+                        </div>
 
-                {/* ENTER CONFIRMATION PASSWORD */}
-                <input
-                    {...register('confirmPassword')}
-                    className="w-full outline-0 h-8 rounded-[6px] bg-zinc-500 text-sm p-2"
-                    type="password"
-                    placeholder="Confirm password"
-                />
-                <h1 className="text-red-500 text-sm">
-                    {errors.confirmPassword?.message}
-                </h1>
+                        <div>
+                            <input
+                                {...register('confirmPassword')}
+                                className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                type="password"
+                                placeholder="Confirm your password"
+                            />
+                            {errors.confirmPassword && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.confirmPassword.message}</p>}
+                        </div>
+                    </div>
 
-                {/* SUBMIT BUTTON */}
-                <button
-                    type="submit"
-                    disabled={isPending}
-                    className="bg-black text-white hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50"
-                >
-                    {isPending ? "Creating account..." : "Create account"}
-                </button>
-            </form>
+                    <button
+                        type="submit"
+                        disabled={isPending}
+                        className="bg-primary text-primary-foreground hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50 font-sans text-sm font-medium hover:bg-primary/90 transition"
+                    >
+                        {isPending ? "Creating account..." : "Create account"}
+                    </button>
+
+                    <div className='flex my-2 gap-3 justify-center items-center'>
+                        <div className='w-full bg-border h-px'></div>
+                        <h1 className='text-xs text-muted-foreground font-sans'>OR</h1>
+                        <div className='w-full bg-border h-px'></div>
+                    </div>
+
+                    <div
+                        onClick={() => {
+                            window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
+                        }}
+                        className="w-full h-9 text-sm hover:cursor-pointer bg-background rounded-[6px] font-base border border-border transition flex justify-center items-center gap-1 overflow-hidden text-foreground font-sans hover:text-accent-foreground"
+                    >
+                        <span>Continue with</span>
+                        <img src={google} className='size-10 mt-1' />
+                    </div>
+                </form>
+                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-0 left-5'>Copyright 2025 @ PostVault LTD.</h1>
+                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-0 right-5'>Privacy Policy</h1>
+            </div>
         </div>
     )
 }

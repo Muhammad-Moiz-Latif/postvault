@@ -3,6 +3,8 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import z from "zod"
 import { useForgot } from "../../queries/useForgot";
 import { useState } from "react";
+import fingerprint from '../../../../assets/fingerprint.png';
+import { MoveLeft } from "lucide-react";
 
 const resetEmailSchema = z.object({
     email: z.email("Please enter a vaild email").min(1, "Email is required").trim()
@@ -36,35 +38,44 @@ export default function EnterEmail({ setReset }: { setReset: React.Dispatch<Reac
 
 
     return (
-        <div className="w-1/2 h-40 bg-white rounded-[4px] border border-zinc-300 p-3">
-            <button className="bg-red-400 text-white px-4 rounded-[4px] hover:cursor-pointer"
-                onClick={() => setReset(prev => !prev)}
-            >
-                Close
-            </button>
+        <div className="w-[35%] h-[60%] flex flex-col justify-center gap-3 items-center bg-white rounded-2xl border border-zinc-300 p-3">
+
+            <div className="border border-zinc-200 rounded-md p-1.5">
+                <img src={fingerprint} className="size-5" />
+            </div>
+            <h1 className="font-sans text-2xl tracking-tight">Forgot password?</h1>
+            <p className="font-sans text-sm tracking-tight text-zinc-500">No worries, we'll send you reset instructions</p>
             {
-                Message && <h1 className="text-emerald-500 tracking-tight">{Message}</h1>
+                Message && <h1 className="text-emerald-500 font-sans text-xs tracking-tight">{Message}</h1>
             }
-            <form className="mb-4 flex flex-col gap-2" onSubmit={handleSubmit(onSubmit)}>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <form className="mb-4 flex flex-col w-full px-7" onSubmit={handleSubmit(onSubmit)}>
+                <label htmlFor="email" className="block text-sm mb-1 tracking-tight font-base text-muted-foreground font-sans">
                     Email
                 </label>
                 <input
                     id="email"
                     {...register("email")}
                     placeholder="you@example.com"
-                    className={`w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 text-sm py-2 border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.email ? 'border-destructive' : 'border-border'
                         }`}
                 />
                 {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                    <p className="text-destructive text-xs mt-1 tracking-tight font-sans">{errors.email.message}</p>
                 )}
                 <button
-                    className="w-full h-7 text-sm tracking-tight flex justify-center items-center bg-black text-white rounded-[4px] hover:cursor-pointer"
+                    type="submit"
+                    disabled={isPending}
+                    className="w-full mt-4 text-sm hover:cursor-pointer bg-primary text-primary-foreground py-2 rounded-[6px] font-medium hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed transition font-sans"
                 >
-                    {isPending ? "Sending..." : "Send"}
+                    {isPending ? 'Sending...' : 'Send OTP'}
                 </button>
             </form>
+            <button className=" flex gap-2 justify-center items-center text-zinc-500 font-sans tracking-tight text-sm  px-4 hover:cursor-pointer"
+                onClick={() => setReset(prev => !prev)}
+            >
+                <MoveLeft className="size-4" />
+                Back to log in
+            </button>
         </div>
     )
 }

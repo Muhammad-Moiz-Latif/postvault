@@ -2,10 +2,13 @@
 import { Outlet, Link, useNavigate } from "react-router";
 import { useLogout } from "../features/auth/queries/useLogout";
 import { toast, ToastContainer } from 'react-toastify';
+import { useAuth } from "../context/authContext";
 
 export const MainLayout = () => {
     const { mutate, isPending } = useLogout();
+    const { auth } = useAuth();
     const navigate = useNavigate();
+    console.log(auth);
 
     const handleLogout = () => {
         mutate(undefined, {
