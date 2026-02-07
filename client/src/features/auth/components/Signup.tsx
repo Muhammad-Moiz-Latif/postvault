@@ -7,6 +7,8 @@ import { VerifyEmail } from "./verifyEmail";
 import { useSignup } from "../queries/useSignup";
 import logo from '../../../assets/logo.png';
 import google from '../../../assets/google.png';
+import show from '../../../assets/show.png';
+import hide from '../../../assets/eye.png';
 import bg from '../../../assets/login_bg.jpg';
 
 
@@ -31,6 +33,8 @@ export type signupType = z.infer<typeof signupSchema>;
 export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const [verificationTokenId, setVerificationTokenId] = useState<string | null>(null);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+    const [Visible, setVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const { mutate, isPending } = useSignup();
@@ -57,7 +61,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
         mutate(data, {
             onSuccess: (response) => {
                 if (response.success) {
-                    setVerificationTokenId(response.data);
+                    setVerificationTokenId(response.data!);
                     setShowVerifyModal(true);
                     reset();
                     setPreviewUrl("");
@@ -81,15 +85,12 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
             <div className='w-full h-full rounded-2xl border border-primary/40 relative'>
                 <img src={bg} className='size-full rounded-2xl' />
                 <h1 className='absolute bottom-10 left-3 font-serif text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
-                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-lg'>Write stories, notes, and ideas without distraction.</p>
+                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-lg'>Write without distraction. Share with intention.</p>
             </div>
             <div className='w-full h-full flex flex-col justify-start pt-15 items-center relative'>
-                <div className='flex gap-1 justify-center items-center absolute top-3 left-5'>
-                    <img src={logo} className='size-6' />
-                    <h1 className='font-sans text-xl tracking-tight'>PostVault</h1>
-                </div>
-                <div className='mb-4'>
-                    <h1 className='text-center tracking-tight text-2xl font-sans text-foreground'>Create account</h1>
+                <img src={logo} className='size-24 object-contain absolute -top-5 left-5' />
+                <div className='mb-4 text-center'>
+                    <h1 className='text-center tracking-tight text-2xl font-sans text-foreground'>Create an account to write and publish</h1>
                     <p className='text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign up.</p>
                 </div>
 
@@ -111,6 +112,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                         </button>
                     </div>
 
+                    {/* ENTER PROFILE PICTURE */}
                     <div className="flex justify-center mb-1.5">
                         <label htmlFor="profile-picture" className="cursor-pointer">
                             <div className="size-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border hover:border-primary transition-all">
@@ -132,6 +134,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                     {errors.image && <p className="text-destructive text-xs text-center mb-2 font-sans">{errors.image.message}</p>}
                     {errorMessage && <p className="text-destructive text-xs text-center mb-2 font-sans">{errorMessage}</p>}
 
+                    {/* ENTER USERNAME */}
                     <div className="grid grid-cols-2 gap-2.5 mb-3">
                         <div>
                             <input
@@ -143,6 +146,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                             {errors.username && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.username.message}</p>}
                         </div>
 
+                        {/* ENTER EMAIL */}
                         <div>
                             <input
                                 {...register("email")}
@@ -153,27 +157,48 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                             {errors.email && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.email.message}</p>}
                         </div>
 
+                        {/* ENTER PASSWORD */}
                         <div>
-                            <input
-                                {...register('password')}
-                                className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
-                                type="password"
-                                placeholder="Enter your password"
-                            />
+                            <div className="flex relative">
+                                <input
+                                    {...register('password')}
+                                    className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                    type={isVisible ? "text" : "password"}
+                                    placeholder="Enter your password"
+                                />
+                                <button
+                                    type='button'
+                                    className='hover:cursor-pointer absolute right-2 bottom-1.5'
+                                    onClick={() => setIsVisible((prev) => !prev)}>
+                                    <img src={isVisible ? show : hide} className='size-5' />
+                                </button>
+                            </div>
+
                             {errors.password && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.password.message}</p>}
                         </div>
 
+                        {/* CONFIRM PASSWORD */}
                         <div>
-                            <input
-                                {...register('confirmPassword')}
-                                className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
-                                type="password"
-                                placeholder="Confirm your password"
-                            />
+                            <div className="flex relative">
+                                <input
+                                    {...register('confirmPassword')}
+                                    className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                    type={Visible ? "text" : "password"}
+                                    placeholder="Confirm your password"
+                                />
+                                <button
+                                    type='button'
+                                    className='hover:cursor-pointer absolute right-2 bottom-1.5'
+                                    onClick={() => setVisible((prev) => !prev)}>
+                                    <img src={Visible ? show : hide} className='size-5' />
+                                </button>
+                            </div>
+
                             {errors.confirmPassword && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.confirmPassword.message}</p>}
                         </div>
                     </div>
 
+                    {/* SUBMIT BUTTON */}
                     <button
                         type="submit"
                         disabled={isPending}
@@ -188,6 +213,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                         <div className='w-full bg-border h-px'></div>
                     </div>
 
+                    {/* GOOGLE  BUTTON */}
                     <div
                         onClick={() => {
                             window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
@@ -195,7 +221,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                         className="w-full h-9 text-sm hover:cursor-pointer bg-background rounded-[6px] font-base border border-border transition flex justify-center items-center gap-1 overflow-hidden text-foreground font-sans hover:text-accent-foreground"
                     >
                         <span>Continue with</span>
-                        <img src={google} className='size-10 mt-1' />
+                        <img src={google} className='size-10 mt-0.5' />
                     </div>
                 </form>
                 <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-0 left-5'>Copyright 2025 @ PostVault LTD.</h1>

@@ -1,5 +1,5 @@
 import { Navigate } from "react-router"
-import { useAuth } from "../../../context/authContext";
+import { useAuth } from "../context/authContext";
 
 export function AuthGate() {
     const { auth } = useAuth();

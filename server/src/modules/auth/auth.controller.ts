@@ -381,6 +381,9 @@ export const authController = {
             return res.status(200).json({
                 success: true,
                 message: "Access token refreshed",
+                data: {
+                    userId: decoded.id
+                },
                 access_token,
             });
         });

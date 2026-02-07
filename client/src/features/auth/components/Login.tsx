@@ -9,6 +9,8 @@ import { useState } from 'react';
 import EnterEmail from './ui/input-email';
 import logo from '../../../assets/logo.png';
 import google from '../../../assets/google.png';
+import show from '../../../assets/show.png';
+import hide from '../../../assets/eye.png';
 import bg from '../../../assets/login_bg.jpg';
 
 const loginSchema = z.object({
@@ -27,6 +29,7 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
     });
     const [isReset, setReset] = useState(false);
     const { mutate, isPending } = useLogin();
+    const [isVisible, setIsVisible] = useState(false);
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState("");
     const { setAuth } = useAuth();
@@ -36,7 +39,7 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
             onSuccess: (response) => {
                 if (response.success) {
                     toast.success(response.message);
-                    setAuth({ access_token: response.access_token!, user_id: response.data._id });
+                    setAuth({ access_token: response.access_token!, user_id: response.data?._id! });
                     reset();
                     setTimeout(() => {
                         navigate('/app');
@@ -69,15 +72,12 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
             <div className='w-full h-full rounded-2xl border border-primary/40 relative'>
                 <img src={bg} className='size-full rounded-2xl' />
                 <h1 className='absolute bottom-10 left-3 font-serif text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
-                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-lg'>Write stories, notes, and ideas without distraction.</p>
+                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-lg'>Write without distraction. Share with intention.</p>
             </div>
             <div className='w-full h-full flex flex-col justify-between py-20 items-center relative'>
-                <div className='flex gap-1 justify-center items-center absolute top-3 left-5'>
-                    <img src={logo} className='size-6' />
-                    <h1 className='font-sans text-xl tracking-tight'>PostVault</h1>
-                </div>
-                <div className='mb-4'>
-                    <h1 className='text-center tracking-tight text-2xl font-sans text-foreground'>Welcome back!</h1>
+                <img src={logo} className='size-24 object-contain absolute -top-5 left-5' />
+                <div className='mb-4 text-center'>
+                    <h1 className='text-center tracking-tight text-2xl font-sans text-foreground'>Continue where you left off</h1>
                     <p className='text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign in.</p>
                 </div>
 
@@ -103,8 +103,9 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                         </button>
                     </div>
 
-                    {errorMessage && <h1 className="text-destructive font-sans">{errorMessage}</h1>}
+                    {errorMessage && <h1 className="text-destructive font-sans text-sm tracking-tight my-1 text-center">{errorMessage}</h1>}
 
+                    {/* ENTER EMAIL */}
                     <div className="mb-2">
                         <label htmlFor="email" className="block text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
                             Email
@@ -121,23 +122,34 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                         )}
                     </div>
 
-                    <div className="">
+                    {/* ENTER PASSWORD */}
+                    <div className="relative">
                         <label htmlFor="password" className="block text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
                             Password
                         </label>
-                        <input
-                            id="password"
-                            type="password"
-                            {...register("password")}
-                            placeholder="Enter your password"
-                            className={`w-full px-4 py-2 text-sm border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.password ? 'border-destructive' : 'border-border'
-                                }`}
-                        />
+                        <div className='flex relative'>
+                            <input
+                                id="password"
+                                type={isVisible ? "text" : "password"}
+                                {...register("password")}
+                                placeholder="Enter your password"
+                                className={`w-full px-4 py-2 text-sm border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.password ? 'border-destructive' : 'border-border'
+                                    }`}
+                            />
+                            <button
+                                type='button'
+                                className='hover:cursor-pointer absolute right-2 bottom-2'
+                                onClick={() => setIsVisible((prev) => !prev)}>
+                                <img src={isVisible ? show : hide} className='size-5' />
+                            </button>
+                        </div>
+
                         {errors.password && (
                             <p className="text-destructive text-xs tracking-tight font-sans">{errors.password.message}</p>
                         )}
                     </div>
 
+                    {/* FORGOT PASSWORD */}
                     <button
                         type='button'
                         className='text-xs text-end mb-2 w-full tracking-tight hover:cursor-pointer text-primary font-sans'
@@ -146,10 +158,11 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                         Forgot password
                     </button>
 
+                    {/* SUBMIT BUTTON */}
                     <button
                         type="submit"
                         disabled={isPending}
-                        className="w-full text-sm hover:cursor-pointer bg-primary text-primary-foreground py-2 rounded-[6px] font-medium hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed transition font-sans"
+                        className="w-full text-sm hover:cursor-pointer bg-primary text-primary-foreground py-2 rounded-[6px] font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition font-sans"
                     >
                         {isPending ? 'Logging in...' : 'Login'}
                     </button>
@@ -160,6 +173,7 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                         <div className='w-full bg-border h-px'></div>
                     </div>
 
+                    {/* GOOGLE BUTTON */}
                     <div
                         onClick={() => {
                             window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
@@ -167,7 +181,7 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                         className="w-full h-9 text-sm hover:cursor-pointer bg-background rounded-[6px] font-base border border-border disabled:bg-muted disabled:cursor-not-allowed transition flex justify-center items-center gap-1 overflow-hidden text-foreground font-sans"
                     >
                         <span>Continue with</span>
-                        <img src={google} className='size-10 mt-1' />
+                        <img src={google} className='size-10 mt-0.5' />
                     </div>
                 </form>
                 <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-0 left-5'>Copyright 2025 @ PostVault LTD.</h1>
