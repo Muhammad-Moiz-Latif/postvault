@@ -5,8 +5,9 @@ import { MainLayout } from "./layouts/MainLayout";
 import { AuthGate } from "./components/AuthGate";
 import ResetPassword from "./features/auth/components/resetPassword";
 import { GoogleSuccess } from "./features/auth/components/ui/google-success";
-import { ProtectedRoutes } from "./components/ProtectedRoutes";
-import { Dashboard } from "./features/user/pages/Dashboard";
+import { Home } from "./features/user/pages/Home";
+import { SideBarProvider } from "./context/sidebarContext";
+import { CreatePost } from "./features/posts/pages/CreatePost";
 
 
 export const router = createBrowserRouter(
@@ -37,11 +38,18 @@ export const router = createBrowserRouter(
                 },
                 {
                     path: '/app',
-                    element: <MainLayout />,
+                    element:
+                        <SideBarProvider>
+                            <MainLayout />
+                        </SideBarProvider>,
                     children: [
                         {
                             index: true,
-                            element: <Dashboard />
+                            element: <Home />
+                        },
+                        {
+                            path: 'posts/new',
+                            element: <CreatePost />
                         }
                     ]
                 }

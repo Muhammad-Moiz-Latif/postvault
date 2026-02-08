@@ -65,6 +65,7 @@ export const postService = {
                     p.title,
                     p.paragraph,
                     p.img,
+                    p."createdAt",
                     p.tags,
                     json_build_object(
                         'id', u.id,
@@ -82,7 +83,7 @@ export const postService = {
                     ) AS likeCount
 
                     FROM posts p LEFT JOIN users u ON
-                    p."authorId" = u.id WHERE p.status = 'PUBLISHED'
+                    p."authorId" = u.id WHERE p.status = 'DRAFT'
                     ORDER BY p."createdAt" DESC
             `);
         return posts.rows;

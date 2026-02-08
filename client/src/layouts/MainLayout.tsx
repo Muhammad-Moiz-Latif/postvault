@@ -2,11 +2,9 @@ import { Outlet } from "react-router";
 import { Navbar } from "../features/user/components/Navbar";
 import { SideBar } from "../features/user/components/Sidebar";
 import { useAuthRedirect } from "../hooks/useAuthRedirect";
-import { useState } from "react";
 
 export const MainLayout = () => {
     const { isChecking } = useAuthRedirect();
-    const [isOpen, setIsOpen] = useState(true);
 
     if (isChecking) {
         return (
@@ -18,11 +16,11 @@ export const MainLayout = () => {
 
 
     return (
-        <div className="max-w-full min-h-screen">
-            <SideBar isOpen={isOpen} setIsOpen={setIsOpen}/>
+        <div className="flex min-h-screen w-full">
+            <SideBar />
             <div className="flex-1 flex flex-col">
-                <Navbar isOpen={isOpen}/>
-                <main className="flex-1">
+                <Navbar />
+                <main className="flex-1 overflow-y-auto overflow-x-hidden">
                     <Outlet />
                 </main>
             </div>

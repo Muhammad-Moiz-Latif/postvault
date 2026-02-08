@@ -38,3 +38,21 @@ export type UserProfileResponse = ApiResponse<{
         likedAt: string;
     }>;
 }>;
+
+export type AllPostsResponse = ApiResponse<[
+    {
+        id: string,
+        title: string,
+        paragraph: string,
+        createdAt: Date,
+        img: string,
+        tags: Array<string>,
+        author: {
+            id: string,
+            username: string,
+            img: string
+        },
+        commentcount: number,
+        likecount: number
+    }
+]>;

@@ -14,6 +14,7 @@ import {
     User2,
     Settings,
 } from "lucide-react";
+import { useSidebar } from "../../../context/sidebarContext";
 
 const NAV_ITEMS = [
     { icon: Home, label: "Home", to: "/app" },
@@ -24,15 +25,10 @@ const NAV_ITEMS = [
 
 
 
-export function SideBar({
-    isOpen,
-    setIsOpen,
-}: {
-    isOpen: boolean;
-    setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export function SideBar() {
     const { mutate, isPending } = useLogout();
     const { setAuth } = useAuth();
+    const { isOpen, setIsOpen } = useSidebar();
     const navigate = useNavigate();
 
     function handleLogout() {
@@ -53,9 +49,9 @@ export function SideBar({
     return (
         <aside
             className={`
-                fixed left-0 top-0 h-screen
+                shrink-0  h-screen 
                 bg-card border-r border-border
-                transition-[width] duration-300 ease-in-out
+                transition-all duration-300 ease-in-out
                 ${isOpen ? "w-52" : "w-20"}
                 flex flex-col
             `}

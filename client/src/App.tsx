@@ -6,8 +6,8 @@ export default function App() {
 
   return (
     <>
-      <div className="w-screen min-h-screen">
-        <Outlet/>
+      <div className="w-full min-h-screen">
+        <Outlet />
       </div>
     </>
   )
