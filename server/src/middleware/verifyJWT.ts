@@ -4,8 +4,9 @@ import { Request, Response, NextFunction } from 'express';
 
 export const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     //header = Bearer ${token}
-    const header = req.header('authorization');
+    const header = req.header('Authorization');
     if (!header) {
+        console.log("NO header initially")
         return res.status(401).json({
             success: false,
             message: 'No authorization header'
@@ -14,7 +15,7 @@ export const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
     const token = header.split(" ")[1];
     jwt.verify(token, process.env.access_secret!, (err, decoded) => {
         if (err || !decoded || typeof decoded === "string") {
-            return res.status(403).json({
+            return res.status(401).json({
                 success: false,
                 message: 'Token invalid or expired'
             });

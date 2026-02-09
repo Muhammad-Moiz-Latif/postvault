@@ -5,7 +5,7 @@ interface PostType {
     title: string,
     paragraph: string,
     img: string,
-    createdAt: Date,
+    createdAt: string,
     tags: Array<string>,
     author: {
         id: string,
@@ -17,6 +17,7 @@ interface PostType {
 };
 
 export const PostCard = ({ Post }: { Post: PostType }) => {
+    console.log(Post);
     const date = new Date(Post.createdAt);
     const formattedDate = date.toLocaleDateString("en-us", {
         month: "short",

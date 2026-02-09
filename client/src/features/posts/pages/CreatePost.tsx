@@ -1,7 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler, useFieldArray } from "react-hook-form";
 import z from "zod"
+import { useCreatePost } from "../queries/useCreatePost";
+import { ToastContainer, toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PostSchema = z.object({
     title: z.string().min(10, "Title must be at least 10 characters").max(30, "Title cannot be longer than 30 characters"),
@@ -10,15 +13,28 @@ const PostSchema = z.object({
         .refine(files => files.length > 0, "Please select an image for your post")
         .refine(files => files.length > 0 && files[0].size < 10_000_000, "Image must be less than 10MB")
         .refine(files => files.length > 0 && ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(files[0].type), "Only JPEG, PNG, GIF, and WEBP formats are supported"),
-    tags: z.array(z.string()).min(1, "At least one tag is required").max(5, "Only 5 tags can be defined")
+    tags: z.array(z.object({ value: z.string() })).min(1, "At least one tag is required").max(5, "Only 5 tags can be defined")
 });
 
-type PostSchemaType = z.infer<typeof PostSchema>;
+export type PostSchemaType = z.infer<typeof PostSchema>;
 
 export const CreatePost = () => {
     const [previewUrl, setPreviewUrl] = useState<string>("");
-    const { register, handleSubmit, reset, formState: { errors }, watch } = useForm({
-        resolver: zodResolver(PostSchema)
+    const [errorMessage, setErrorMessage] = useState("");
+    const queryClient = useQueryClient();
+    const { mutate, isPending } = useCreatePost();
+    const { register, handleSubmit, control, reset, formState: { errors }, watch } = useForm<PostSchemaType>({
+        resolver: zodResolver(PostSchema),
+        defaultValues: {
+            title: "",
+            paragraph: "",
+            tags: []
+        }
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: 'tags'
     });
 
     const profilePicture = watch("image");
@@ -37,19 +53,40 @@ export const CreatePost = () => {
     }, [profilePicture]);
 
     const onSubmit: SubmitHandler<PostSchemaType> = (data) => {
-
+        setErrorMessage(""); // Clear previous errors
+        mutate(data, {
+            onSuccess: (response) => {
+                if (response.success) {
+                    toast.success(response.message);
+                    queryClient.invalidateQueries({ queryKey: ["all-posts"] });
+                    setPreviewUrl("");
+                    reset();
+                }
+            },
+            onError: (error: any) => {
+                setErrorMessage(error.response.data.message);
+                console.error("Signup error in component:", error);
+            }
+        })
     };
 
     return (
         <div className="font-sans p-3 overflow-x-hidden">
+            <ToastContainer
+                position='top-center'
+                closeOnClick
+                draggable
+                hideProgressBar={true}
+            />
             <h1 className="text-3xl tracking-tight">Create your post</h1>
+            {errorMessage && <h1 className="text-destructive font-sans text-sm tracking-tight my-1 text-center">{errorMessage}</h1>}
             <form className="w-full max-w-xl flex flex-col" onSubmit={handleSubmit(onSubmit)}>
 
                 {/* ENTER TITLE */}
                 <input
                     type="text"
                     {...register("title")}
-                    className="w-full h-9 rounded-md outline-none p-2 text-sm tracking-tight border border-border"
+                    className="w-full h-9 rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
                     placeholder="Enter a title"
                 />
                 {errors.title && <h1 className="text-red-500 mb-2 mt-0.5 text-xs tracking-tight">{errors.title.message}</h1>}
@@ -58,17 +95,17 @@ export const CreatePost = () => {
                 <textarea
                     rows={5}
                     {...register("paragraph")}
-                    className="w-full rounded-md outline-none p-2 text-sm tracking-tight border border-border"
-                    placeholder="Enter you paragraph"
+                    className="w-full rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
+                    placeholder="Enter your paragraph"
                 />
                 {errors.paragraph && <h1 className="text-red-500 mb-2 mt-0.5 text-xs tracking-tight">{errors.paragraph.message}</h1>}
 
                 {/* SELECT IMAGE */}
-                <div className="flex  mb-1.5">
+                <div className="flex mb-1.5">
                     <label htmlFor="profile-picture" className="cursor-pointer">
                         <div className="w-96 h-40 rounded-md bg-muted flex items-center justify-center border-2 border-border hover:border-primary transition-all">
                             {previewUrl ? (
-                                <img src={previewUrl} alt="Profile preview" className="w-full h-full object-cover" />
+                                <img src={previewUrl} alt="Profile preview" className="w-full h-full object-cover rounded-md" />
                             ) : (
                                 <div className="text-xl">📷</div>
                             )}
@@ -85,24 +122,58 @@ export const CreatePost = () => {
                 {errors.image && <p className="text-destructive text-xs text-center mb-2 mt-0.5 font-sans">{errors.image.message}</p>}
 
                 {/* SELECT TAGS */}
-                <textarea
-                    rows={5}
-                    {...register("paragraph")}
-                    className="w-full rounded-md outline-none p-2 text-sm tracking-tight border border-border"
-                    placeholder="Enter you paragraph"
+                <input
+                    type="text"
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+
+                            const value = e.currentTarget.value.trim();
+                            if (!value) return;
+                            if (fields.length >= 5) return;
+
+                            append({ value });
+                            e.currentTarget.value = "";
+                        }
+                    }}
+                    className="w-full rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
+                    placeholder="Press Enter to add tags"
                 />
-                {errors.tags && <h1 className="text-red-500 mb-2 mt-0.5 text-xs tracking-tight">{errors.tags.message}</h1>}
+
+                <div className="flex flex-wrap gap-2 mb-2">
+                    {fields.map((field, index) => (
+                        <div
+                            key={field.id}
+                            className="bg-muted px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                        >
+                            {field.value}
+                            <button
+                                type="button"
+                                onClick={() => remove(index)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                {errors.tags && (
+                    <p className="text-destructive text-xs mb-2">
+                        {errors.tags.message}
+                    </p>
+                )}
 
                 {/* SUBMIT BUTTON */}
                 <button
                     type="submit"
-                    // disabled={isPending}
+                    disabled={isPending}
                     className="bg-primary text-primary-foreground hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50 font-sans text-sm font-medium hover:bg-primary/90 transition"
                 >
-                    {/* {isPending ? "Creating account..." : "Create account"} */}
-                    Create Post
+                    {isPending ? "Creating.." : "Create Post"}
                 </button>
             </form>
         </div>
     )
-}
+};
+

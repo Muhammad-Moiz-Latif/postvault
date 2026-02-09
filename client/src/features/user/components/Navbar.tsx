@@ -5,7 +5,7 @@ import { useUserProfile } from "../queries/useProfile";
 export function Navbar() {
     const { auth } = useAuth();
     const { data, isLoading, error } = useUserProfile(auth.user_id);
-    const profile = data?.data!;
+    const profile = data?.data;
     return (
         <header className="h-16 bg-card border-b font-sans border-border flex items-center justify-between px-6">
             <div className="flex w-full relative">
@@ -40,12 +40,12 @@ export function Navbar() {
                 ) : (
                     <button className="flex gap-2 items-center hover:bg-muted px-2 py-1.5 rounded-md transition-colors">
                         <img
-                            src={profile.img}
-                            alt={profile.username}
+                            src={profile?.img || ""}
+                            alt={profile?.username}
                             className="size-8 rounded-full object-cover"
                         />
                         <span className="text-sm text-foreground font-medium">
-                            {profile.username}
+                            {profile?.username}
                         </span>
                         <ChevronDown className="size-4 text-muted-foreground" />
                     </button>

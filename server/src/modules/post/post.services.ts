@@ -58,8 +58,11 @@ export const postService = {
         return post;
     },
 
-    async getAllPosts() {
-        const posts = await db.execute(sql`
+    async getAllPosts(cursor?: string, limit: number = 10) {
+        let query;
+        if (cursor) {
+            //GET Posts after the cursor
+            query = sql`
                 SELECT
                     p.id,
                     p.title,
@@ -83,10 +86,52 @@ export const postService = {
                     ) AS likeCount
 
                     FROM posts p LEFT JOIN users u ON
-                    p."authorId" = u.id WHERE p.status = 'DRAFT'
+                    p."authorId" = u.id WHERE p.status = 'PUBLISHED'
+                    AND p."createdAt" < (
+                        SELECT "createdAt" FROM posts WHERE p.id = ${cursor}
+                    )
                     ORDER BY p."createdAt" DESC
-            `);
-        return posts.rows;
+                    LIMIT ${limit}
+            `;
+        } else {
+            //First page - No cursor
+            query = sql`
+                SELECT
+                    p.id,
+                    p.title,
+                    p.paragraph,
+                    p.img,
+                    p."createdAt",
+                    p.tags,
+                    json_build_object(
+                        'id', u.id,
+                        'username',u.username,
+                        'img',u.img          
+                    ) AS author,
+                    (
+                        SELECT COUNT(*) FROM
+                        comments c WHERE
+                        c."postId" = p.id
+                    ) AS commentCount,
+                    (
+                        SELECT COUNT(*) FROM likepost lp WHERE
+                        lp."postId" = p.id
+                    ) AS likeCount
+
+                    FROM posts p LEFT JOIN users u ON
+                    p."authorId" = u.id WHERE p.status = 'PUBLISHED'
+                    ORDER BY p."createdAt" DESC
+                    LIMIT ${limit}
+            `;
+        };
+        const posts = await db.execute(query);
+        const nextCursor = posts.rows.length === limit ? posts.rows[posts.rows.length - 1].id : null;
+        const hasMore = posts.rows.length === limit;
+        return {
+            posts: posts.rows,
+            nextCursor,
+            hasMore
+        };
     },
 
     async removeLikeFromPost(authorId: string, postId: string) {

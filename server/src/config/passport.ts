@@ -2,6 +2,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { authService } from "../modules/auth/auth.service";
+import uploadImage from "../services/cloudinary.service";
 
 export const configurePassport = () => {
     passport.use(
@@ -19,6 +20,10 @@ export const configurePassport = () => {
                     const email = profile.emails?.[0]?.value;
                     const username = profile.displayName;
                     const img = profile.photos?.[0]?.value;
+                    let imgURL: string | null = null;
+                    if (img) {
+                        imgURL = await uploadImage(img);
+                    };
 
                     if (!email) {
                         return done(new Error("No email from Google"), undefined);
@@ -28,11 +33,12 @@ export const configurePassport = () => {
                     let user = await authService.verifyUser(email);
 
                     if (!user) {
+
                         // Create new user for Google auth
-                        user = await authService.createGoogleUser(email, username, img!);
+                        user = await authService.createGoogleUser(email, username, imgURL as string);
                     } else if (user.authType === 'CREDENTIALS') {
                         //link user Credential account with user Google account
-                        user = await authService.linkUserWithCredentialsAndGoogle(email, username, img!);
+                        user = await authService.linkUserWithCredentialsAndGoogle(email, username, imgURL as string);
                     };
 
                     // Transform database user to Passport user format

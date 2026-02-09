@@ -2,12 +2,12 @@ import { createBrowserRouter } from "react-router";
 import App from "./App";
 import Auth from "./features/auth/pages/Auth";
 import { MainLayout } from "./layouts/MainLayout";
-import { AuthGate } from "./components/AuthGate";
 import ResetPassword from "./features/auth/components/resetPassword";
 import { GoogleSuccess } from "./features/auth/components/ui/google-success";
 import { Home } from "./features/user/pages/Home";
 import { SideBarProvider } from "./context/sidebarContext";
 import { CreatePost } from "./features/posts/pages/CreatePost";
+import { ProtectedRoute } from "./components/ProtectedRoutes";
 
 
 export const router = createBrowserRouter(
@@ -17,10 +17,6 @@ export const router = createBrowserRouter(
             element: <App />,
             errorElement: <div>404 not Found</div>,
             children: [
-                {
-                    element: <AuthGate />,
-                    index: true
-                },
                 {
                     path: '/auth',
                     element: <Auth />,
@@ -37,21 +33,27 @@ export const router = createBrowserRouter(
                     element: <ResetPassword />
                 },
                 {
-                    path: '/app',
-                    element:
-                        <SideBarProvider>
-                            <MainLayout />
-                        </SideBarProvider>,
+                    path: "/app",
+                    element: <ProtectedRoute />,
                     children: [
                         {
-                            index: true,
-                            element: <Home />
+                            element: (
+                                <SideBarProvider>
+                                    <MainLayout />
+                                </SideBarProvider>
+                            ),
+                            children: [
+                                {
+                                    index: true,
+                                    element: <Home />,
+                                },
+                                {
+                                    path: "posts/new",
+                                    element: <CreatePost />,
+                                },
+                            ],
                         },
-                        {
-                            path: 'posts/new',
-                            element: <CreatePost />
-                        }
-                    ]
+                    ],
                 }
             ]
         }

@@ -14,7 +14,7 @@ export type LoginResponse = ApiResponse<{
     username: string,
     img: string,
     email: string,
-    createdAt: Date
+    createdAt: string
 }>;
 
 export type RefreshTokenResponse = ApiResponse<{ userId: string }>;
@@ -39,20 +39,37 @@ export type UserProfileResponse = ApiResponse<{
     }>;
 }>;
 
-export type AllPostsResponse = ApiResponse<[
-    {
+interface Post {
+    id: string,
+    title: string,
+    paragraph: string,
+    createdAt: string,
+    img: string,
+    tags: Array<string>,
+    author: {
         id: string,
-        title: string,
-        paragraph: string,
-        createdAt: Date,
-        img: string,
-        tags: Array<string>,
-        author: {
-            id: string,
-            username: string,
-            img: string
-        },
-        commentcount: number,
-        likecount: number
-    }
-]>;
+        username: string,
+        img: string
+    },
+    commentcount: number,
+    likecount: number
+};
+
+export type AllPostsResponse = ApiResponse<{
+    posts: Post[],
+    nextCursor: string | null,
+    hasMore: boolean
+}>;
+
+export type CreatePostResponse = ApiResponse<{
+    id: string,
+    authorId: string,
+    title: string,
+    img: string,
+    paragraph: string,
+    tags: string[],
+    status: string,
+    createdAt: string,
+    updatedAt: string,
+    publishedAt: string
+}>;

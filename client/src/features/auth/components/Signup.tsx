@@ -57,7 +57,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
         return () => URL.revokeObjectURL(objectURL);
     }, [profilePicture]);
 
-    const onSubmit: SubmitHandler<signupType> = async (data) => {
+    const onSubmit: SubmitHandler<signupType> = (data) => {
         mutate(data, {
             onSuccess: (response) => {
                 if (response.success) {

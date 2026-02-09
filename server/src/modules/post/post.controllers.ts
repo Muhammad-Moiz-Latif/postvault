@@ -20,6 +20,7 @@ export const postController = {
             };
 
             const image = req.file;
+            console.log(image?.buffer);
             let imgURL: string | null = null;
 
             if (image) {
@@ -27,6 +28,8 @@ export const postController = {
             };
 
             const authorId = req.user?.id;
+
+            console.log(imgURL);
 
             const createdPost = await postService.createPost(authorId!, title, paragraph, tags, imgURL);
 
@@ -188,7 +191,8 @@ export const postController = {
 
     async getAllPosts(req: Request, res: Response) {
         try {
-            const getPosts = await postService.getAllPosts();
+            const cursor = req.query.cursor as string | undefined;
+            const getPosts = await postService.getAllPosts(cursor);
             if (getPosts) {
                 return res.status(200).json({
                     success: true,
