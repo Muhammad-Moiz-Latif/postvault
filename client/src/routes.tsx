@@ -8,6 +8,7 @@ import { Home } from "./features/user/pages/Home";
 import { SideBarProvider } from "./context/sidebarContext";
 import { CreatePost } from "./features/posts/pages/CreatePost";
 import { ProtectedRoute } from "./components/ProtectedRoutes";
+import { DetailPost } from "./features/posts/pages/DetailPost";
 
 
 export const router = createBrowserRouter(
@@ -46,6 +47,10 @@ export const router = createBrowserRouter(
                                 {
                                     index: true,
                                     element: <Home />,
+                                },
+                                {
+                                    path: ":postId",
+                                    element: <DetailPost />
                                 },
                                 {
                                     path: "posts/new",

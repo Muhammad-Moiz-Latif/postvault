@@ -6,21 +6,14 @@ import { postService } from './post.services';
 export const postController = {
     async createPost(req: Request, res: Response) {
         try {
-            let { title, paragraph, tags } = req.body;
+            let { title, paragraph, tags, status } = req.body;
+
 
             if (typeof tags === 'string') {
                 tags = JSON.parse(tags);
-            }
-
-            if (!title || !paragraph || !tags) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Title, paragraph and tags are required"
-                });
             };
 
             const image = req.file;
-            console.log(image?.buffer);
             let imgURL: string | null = null;
 
             if (image) {
@@ -29,9 +22,8 @@ export const postController = {
 
             const authorId = req.user?.id;
 
-            console.log(imgURL);
 
-            const createdPost = await postService.createPost(authorId!, title, paragraph, tags, imgURL);
+            const createdPost = await postService.createPost(authorId!, title, paragraph, tags, imgURL, status);
 
             if (createdPost) {
                 return res.status(201).json({
@@ -128,7 +120,7 @@ export const postController = {
                 });
             };
 
-            const getPost = await postService.getPost(postId);
+            const getPost = await postService.getPost(postId , authorId);
 
             if (!getPost) {
                 return res.status(400).json({
@@ -226,7 +218,7 @@ export const postController = {
                 });
             };
 
-            const getPost = await postService.getPost(postId);
+            const getPost = await postService.getPost(postId , authorId);
 
             if (!getPost) {
                 return res.status(404).json({

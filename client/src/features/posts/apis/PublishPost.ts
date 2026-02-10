@@ -2,8 +2,9 @@ import { privateApi } from "../../../app/axios";
 import type { CreatePostResponse } from "../../types";
 import type { PostSchemaType } from "../pages/CreatePost";
 
-export async function CreatePost(Data: PostSchemaType) {
+export async function PublishPost(Data: PostSchemaType) {
     const formData = new FormData();
+    formData.append("status", "PUBLISHED");
     if (Data.title) formData.append("title", Data.title);
     if (Data.paragraph) formData.append("paragraph", Data.paragraph);
     if (Data.image && Data.image.length > 0) formData.append("image", Data.image[0]);

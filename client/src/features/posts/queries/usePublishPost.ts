@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { CreatePost } from "../apis/CreatePost";
+import { PublishPost } from "../apis/PublishPost";
 
-export function useCreatePost() {
+export function usePublishPost() {
     return useMutation({
-        mutationFn: CreatePost,
+        mutationFn: PublishPost,
         onError: (error) => {
             console.error(error);
         }
     });
-};
+}

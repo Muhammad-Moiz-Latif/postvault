@@ -2,7 +2,8 @@ export type ApiResponse<T> = {
     success: boolean,
     message: string,
     data?: T,
-    access_token?: string
+    access_token?: string,
+    action?: string
 };
 
 export type SignupResponse = ApiResponse<string>;
@@ -73,3 +74,33 @@ export type CreatePostResponse = ApiResponse<{
     updatedAt: string,
     publishedAt: string
 }>;
+
+export interface CommentsinDetailedPost {
+    id: string,
+    text: string,
+    createdAt: string,
+    author: {
+        username: string,
+        email: string,
+        img: string
+    },
+    likes: number,
+    replies: CommentsinDetailedPost[]
+};
+
+export type DetailedPostResponse = ApiResponse<{
+    id: string,
+    title: string,
+    paragraph: string,
+    createdAt: string,
+    author: {
+        username: string,
+        email: string,
+        img: string
+    },
+    likes: number,
+    likedbyme: boolean,
+    comments: CommentsinDetailedPost[]
+}>;
+
+export type LikeUnlikePostResponse = ApiResponse<null>;

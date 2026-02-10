@@ -1,4 +1,5 @@
 import { Bookmark, HandHeart, MessageCircle } from "lucide-react"
+import { useNavigate } from "react-router";
 
 interface PostType {
     id: string,
@@ -17,14 +18,17 @@ interface PostType {
 };
 
 export const PostCard = ({ Post }: { Post: PostType }) => {
-    console.log(Post);
     const date = new Date(Post.createdAt);
+    const navigate = useNavigate();
     const formattedDate = date.toLocaleDateString("en-us", {
         month: "short",
         day: "numeric"
     });
     return (
-        <article className="w-[70%] h-1/2 border border-border rounded-md px-3 font-sans flex  gap-4 items-center">
+        <article
+            onClick={() => navigate(`${Post.id}`)}
+            className="w-full p-2 h-1/2 border hover:cursor-pointer border-border rounded-md px-3 font-sans flex  gap-4 items-center"
+        >
             <div className="flex flex-col flex-1 gap-3">
                 <div className="flex gap-1">
                     <img src={Post.author.img} className="size-6 rounded-full" />

@@ -37,7 +37,7 @@ export const Home = () => {
         )
     }
     return (
-        <div className="flex flex-col gap-4 items-center">
+        <div className="flex flex-col gap-4 p-3">
             {data?.pages.map((page) => (
                 page.data?.posts.map((post) => (
                     <PostCard key={post.id} Post={post} />

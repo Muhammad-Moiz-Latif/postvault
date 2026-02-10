@@ -2,12 +2,12 @@ import { Search, BellIcon, ChevronDown, User } from "lucide-react"
 import { useAuth } from "../../../context/authContext";
 import { useUserProfile } from "../queries/useProfile";
 
-export function Navbar() {
+export function Navbar({ isOpen }: { isOpen: boolean }) {
     const { auth } = useAuth();
     const { data, isLoading, error } = useUserProfile(auth.user_id);
     const profile = data?.data;
     return (
-        <header className="h-16 bg-card border-b font-sans border-border flex items-center justify-between px-6">
+        <header className={`${isOpen ? "ml-52 w-[82.4%]" : "ml-20 w-[93.2%]"}  fixed transition-all ease-in-out h-16 bg-card border-b font-sans border-border z-10 flex items-center justify-between px-6`}>
             <div className="flex w-full relative">
                 <Search className="absolute text-muted-foreground left-3 top-2.5 size-4" />
                 <input

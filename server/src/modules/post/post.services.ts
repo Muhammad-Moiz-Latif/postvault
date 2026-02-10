@@ -12,14 +12,15 @@ const db = drizzle(process.env.DATABASE_URL!);
 
 
 export const postService = {
-    async createPost(authorId: string, title: string, paragraph: string, tags: string[], imgURL: string | null) {
+    async createPost(authorId: string, title: string, paragraph: string, tags: string[], imgURL: string | null, status: "DRAFT" | "PUBLISHED") {
         const posts = await db.insert(PostTable).values({
             authorId,
             title,
             paragraph,
             img: imgURL,
             tags,
-            publishedAt: null
+            status,
+            publishedAt: status === 'PUBLISHED' ? new Date() : null
         }).returning();
 
         const post = posts[0];
@@ -203,7 +204,7 @@ export const postService = {
         return deletedComment;
     },
 
-    async getPost(postId: string) {
+    async getPost(postId: string, authorId: string) {
 
         const result = await db.execute(sql`
             SELECT
@@ -223,6 +224,12 @@ export const postService = {
                     FROM likepost lp
                     WHERE lp."postId" = p.id
                 ) AS likes,
+
+                EXISTS (
+                    SELECT 1 FROM likepost lp
+                    WHERE lp."postId" = ${postId}
+                    AND lp."authorId" = ${authorId}
+                ) AS likedByMe,
 
                 COALESCE(
                     (

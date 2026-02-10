@@ -2,9 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler, useFieldArray } from "react-hook-form";
 import z from "zod"
-import { useCreatePost } from "../queries/useCreatePost";
+import { useBlocker } from "react-router";
+import { useDraftPost } from "../queries/useDraftPost";
 import { ToastContainer, toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { usePublishPost } from "../queries/usePublishPost";
 
 const PostSchema = z.object({
     title: z.string().min(10, "Title must be at least 10 characters").max(30, "Title cannot be longer than 30 characters"),
@@ -22,8 +25,10 @@ export const CreatePost = () => {
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState("");
     const queryClient = useQueryClient();
-    const { mutate, isPending } = useCreatePost();
-    const { register, handleSubmit, control, reset, formState: { errors }, watch } = useForm<PostSchemaType>({
+    const { mutate: PublishPost, isPending } = usePublishPost();
+    const { mutate: SaveDraft, isPending: DraftPending } = useDraftPost();
+
+    const { register, handleSubmit, control, reset, getValues, formState: { errors, isDirty }, watch } = useForm<PostSchemaType>({
         resolver: zodResolver(PostSchema),
         defaultValues: {
             title: "",
@@ -31,6 +36,22 @@ export const CreatePost = () => {
             tags: []
         }
     });
+
+    // Watch form values to check if there's actual content
+    const formValues = watch();
+
+    const hasContent = () => {
+        return (
+            (formValues.title && formValues.title.trim().length > 0) ||
+            (formValues.paragraph && formValues.paragraph.trim().length > 0) ||
+            (formValues.image && formValues.image.length > 0) ||
+            (formValues.tags && formValues.tags.length > 0)
+        );
+    };
+
+    const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+        isDirty && hasContent() && currentLocation.pathname !== nextLocation.pathname
+    );
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -54,7 +75,7 @@ export const CreatePost = () => {
 
     const onSubmit: SubmitHandler<PostSchemaType> = (data) => {
         setErrorMessage(""); // Clear previous errors
-        mutate(data, {
+        PublishPost(data, {
             onSuccess: (response) => {
                 if (response.success) {
                     toast.success(response.message);
@@ -70,8 +91,31 @@ export const CreatePost = () => {
         })
     };
 
+    function onSave() {
+        const currentFormData = getValues();
+        SaveDraft(currentFormData, {
+            onSuccess: (response) => {
+                if (response.success) {
+                    blocker.proceed?.();
+                }
+            },
+            onError: (error: any) => {
+                toast.error('Failed to save draft');
+                console.error("Signup error in component:", error.response.data.message);
+            }
+        })
+    };
+
+    function onCancel() {
+        blocker.reset?.();
+    };
+
+    function onDiscard() {
+        blocker.proceed?.();
+    };
+
     return (
-        <div className="font-sans p-3 overflow-x-hidden">
+        <div className="font-sans p-3 overflow-x-hidden relative">
             <ToastContainer
                 position='top-center'
                 closeOnClick
@@ -80,7 +124,10 @@ export const CreatePost = () => {
             />
             <h1 className="text-3xl tracking-tight">Create your post</h1>
             {errorMessage && <h1 className="text-destructive font-sans text-sm tracking-tight my-1 text-center">{errorMessage}</h1>}
-            <form className="w-full max-w-xl flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+            <form className="w-full max-w-xl flex flex-col"
+                onSubmit={handleSubmit(onSubmit)}
+
+            >
 
                 {/* ENTER TITLE */}
                 <input
@@ -173,6 +220,10 @@ export const CreatePost = () => {
                     {isPending ? "Creating.." : "Create Post"}
                 </button>
             </form>
+
+            {blocker.state === 'blocked' && (
+                <ConfirmDialog onSave={onSave} onCancel={onCancel} onDiscard={onDiscard} isPending={DraftPending}/>
+            )}
         </div>
     )
 };
