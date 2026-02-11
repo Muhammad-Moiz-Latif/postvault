@@ -48,6 +48,94 @@ export const postController = {
         };
     },
 
+    async savePost(req: Request, res: Response) {
+        try {
+            const postId = req.params.postId as string;
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Unauthorized User"
+                })
+            };
+
+            const isSavedPost = await postService.getSavedPost(userId, postId);
+
+            //post is already saved so we unsave it
+            if (isSavedPost && isSavedPost.postId) {
+                const unSavePost = await postService.removeSavedPost(userId, postId);
+                if (unSavePost) {
+                    return res.status(200).json({
+                        success: true,
+                        message: "Post is unsaved",
+                        action: "unsaved"
+                    });
+                };
+            }
+
+            //save the post if not already saved
+            const savedPost = await postService.savePost(userId, postId);
+
+            if (savedPost) {
+                return res.status(201).json({
+                    success: true,
+                    message: "Saved Post successfully!",
+                    data: savedPost,
+                    action: "saved"
+                })
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "Unable to save post"
+                });
+            };
+
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                sucess: false,
+                message: "Internal server error"
+            });
+        };
+    },
+
+    async getAllSavedPosts(req: Request, res: Response) {
+        try {
+            const userId = req.user?.id;
+            console.log("I reach here");
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Unauthorized User"
+                })
+            };
+
+            const savedPosts = await postService.getAllSavedPosts(userId);
+
+            if (savedPosts) {
+                return res.status(200).json({
+                    success: true,
+                    message: "Retrieved saved posts successfully",
+                    data: savedPosts
+                });
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Did not get saved posts'
+                });
+            };
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        };
+    },
+
     async editPost(req: Request, res: Response) {
         try {
             let { title, paragraph, tags, status } = req.body;
@@ -120,7 +208,7 @@ export const postController = {
                 });
             };
 
-            const getPost = await postService.getPost(postId , authorId);
+            const getPost = await postService.getPost(postId, authorId);
 
             if (!getPost) {
                 return res.status(400).json({
@@ -149,7 +237,6 @@ export const postController = {
         try {
             const postId = req.params.postId as string;
             const authorId = req.user?.id;
-
             if (!authorId) {
                 return res.status(404).json({
                     success: false,
@@ -218,7 +305,7 @@ export const postController = {
                 });
             };
 
-            const getPost = await postService.getPost(postId , authorId);
+            const getPost = await postService.getPost(postId, authorId);
 
             if (!getPost) {
                 return res.status(404).json({
@@ -308,6 +395,9 @@ export const postController = {
             const parentId = req.params.parentId as string;
             const postId = req.params.postId as string;
             const { comment } = req.body;
+            console.log(parentId);
+            console.log(postId);
+            console.log(comment);
             const authorId = req.user?.id;
 
             if (!comment) {

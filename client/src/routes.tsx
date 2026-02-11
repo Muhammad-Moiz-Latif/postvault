@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import App from "./App";
 import Auth from "./features/auth/pages/Auth";
 import { MainLayout } from "./layouts/MainLayout";
@@ -19,7 +19,11 @@ export const router = createBrowserRouter(
             errorElement: <div>404 not Found</div>,
             children: [
                 {
-                    path: '/auth',
+                    index: true,
+                    element: <Navigate to='/auth' replace />
+                },
+                {
+                    path: 'auth',
                     element: <Auth />,
                     children: [
                         {

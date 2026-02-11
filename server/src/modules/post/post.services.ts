@@ -6,6 +6,7 @@ import { CommentTable } from '../../db/schema/comments';
 import { likeCommentTable } from '../../db/schema/like.comment';
 import { likePostTable } from '../../db/schema/like.post';
 import { UserTable } from '../../db/schema/users';
+import { savedPostTable } from '../../db/schema/saved.posts';
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -204,6 +205,25 @@ export const postService = {
         return deletedComment;
     },
 
+    async savePost(userId: string, postId: string) {
+        const [savedPost] = await db.insert(savedPostTable).values({
+            postId,
+            userId
+        }).returning();
+
+        return savedPost;
+    },
+
+    async getAllSavedPosts(userId: string) {
+        const savedPosts = await db.select({
+            post: PostTable
+        }).from(savedPostTable).innerJoin(
+            PostTable, eq(savedPostTable.postId, PostTable.id)).where(eq(
+                savedPostTable.userId, userId
+            ));
+        return savedPosts;
+    },
+
     async getPost(postId: string, authorId: string) {
 
         const result = await db.execute(sql`
@@ -211,12 +231,14 @@ export const postService = {
                 p.id,
                 p.title,
                 p.paragraph,
+                p.img,
                 p."createdAt",
 
                 json_build_object(
                     'username', u.username,
                     'email', u.email,
-                    'img', u.img
+                    'img', u.img,
+                    'id', u.id
                 ) AS author,
 
                 (
@@ -231,6 +253,12 @@ export const postService = {
                     AND lp."authorId" = ${authorId}
                 ) AS likedByMe,
 
+                 EXISTS (
+                    SELECT 1 FROM saved_posts sp
+                    WHERE sp."postId" = ${postId}
+                    AND sp."userId" = ${authorId}
+                ) AS savedByMe,
+
                 COALESCE(
                     (
                     SELECT json_agg(
@@ -241,12 +269,20 @@ export const postService = {
                         'author', json_build_object(
                             'username', cu.username,
                             'email', cu.email,
-                            'img', cu.img
+                            'img', cu.img,
+                            'id', cu.id
                         ),
                         'likes', (
                             SELECT COUNT(*)
                             FROM likecomment lc
                             WHERE lc."commentId" = c.id
+                        ),
+                       'likedByMe',
+                            EXISTS (
+                            SELECT 1 
+                            FROM likecomment lc
+                            WHERE lc."authorId" = ${authorId}
+                            AND lc."commentId" = c.id
                         ),
                         'replies', (
                             COALESCE(
@@ -259,12 +295,20 @@ export const postService = {
                                         'author', json_build_object(
                                             'username', rcu.username,
                                             'email', rcu.email,
-                                            'img', rcu.img
+                                            'img', rcu.img,
+                                            'id', rcu.id
                                          ),
                                         'likes', (
                                             SELECT COUNT(*)
                                             FROM likecomment lc
-                                            WHERE lc."commentId" = c.id
+                                            WHERE lc."commentId" = rc.id
+                                        ),
+                                        'likedByMe',
+                                            EXISTS (
+                                            SELECT 1 
+                                            FROM likecomment lc
+                                            WHERE lc."authorId" = ${authorId}
+                                            AND lc."commentId" = rc.id
                                         )
                                     )
                                 ) FROM comments rc
@@ -307,6 +351,24 @@ export const postService = {
         )).returning();
 
         return comment;
+    },
+
+    async getSavedPost(userId: string, postId: string) {
+        const [savedPost] = await db.select().from(savedPostTable).where(and(
+            eq(savedPostTable.userId, userId),
+            eq(savedPostTable.postId, postId)
+        ));
+
+        return savedPost;
+    },
+
+    async removeSavedPost(userId: string, postId: string) {
+        const [removeSavedPost] = await db.delete(savedPostTable).where(and(
+            eq(savedPostTable.userId, userId),
+            eq(savedPostTable.postId, postId)
+        )).returning();
+
+        return removeSavedPost;
     },
 
     async likeComment(authorId: string, commentId: string) {

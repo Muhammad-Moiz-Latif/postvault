@@ -1,25 +1,30 @@
-import { useParams } from "react-router";
+import { Navigate, replace, useNavigate, useParams } from "react-router";
 import { useDetailedPost } from "../queries/useDetailedPost"
-import type { CommentsinDetailedPost } from "../../types";
 import { useReactToPost } from "../queries/useReactToPost";
 import { useState } from "react";
 import { useComment } from "../queries/useComment";
 import { useQueryClient } from "@tanstack/react-query";
 import { ToastContainer, toast } from "react-toastify";
+import { Comment } from "../components/Comment";
+import { useAuth } from "../../../context/authContext";
+import { useDeletePost } from "../queries/useDeletePost";
 
 export const DetailPost = () => {
     const { postId } = useParams();
+    const { auth } = useAuth();
     const queryClient = useQueryClient();
     const { data, isSuccess, isPending } = useDetailedPost(postId || "");
     const [isComment, setComment] = useState("");
     const { mutate: CommentOnPost, isPending: loadingComment } = useComment();
     const { mutate: ReactToPost } = useReactToPost(postId!);
+    const { mutate: DeletePost, isPending: isDeleting } = useDeletePost();
+    const navigate = useNavigate();
     const post = data?.data!;
 
 
     function handleLike() {
         ReactToPost();
-    }
+    };
 
     function handleComment() {
         CommentOnPost({ postId, comment: isComment }, {
@@ -34,6 +39,24 @@ export const DetailPost = () => {
             }
         })
     };
+
+    async function deletePost() {
+        DeletePost(postId, {
+            onSuccess: () => {
+                toast.success("Deleted Post Successfully!");
+                queryClient.invalidateQueries({ queryKey: ['all-posts'] });
+                setTimeout(() => {
+                    navigate("/app", { replace: true });
+                }, 1500);
+            },
+            onError: (error) => {
+                console.error(error);
+                toast.error("Unable to delete post");
+            }
+        })
+    };
+
+
 
     if (isPending) {
         return (
@@ -50,6 +73,7 @@ export const DetailPost = () => {
             </div>
         );
     };
+
 
     return (
         <article className="w-full min-h-screen bg-white">
@@ -68,18 +92,32 @@ export const DetailPost = () => {
                 </h1>
 
                 {/* Author info */}
-                <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-200">
-                    <img
-                        src={post.author.img}
-                        alt={post.author.username}
-                        className="w-12 h-12 rounded-full object-cover"
-                    />
-                    <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{post.author.username}</span>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <time>{post.createdAt}</time>
+                <div className="flex items-center justify-between gap-3 mb-8 pb-8 border-b border-gray-200">
+                    <div className="flex gap-3">
+                        <img
+                            src={post.author.img}
+                            alt={post.author.username}
+                            className="w-12 h-12 rounded-full object-cover"
+                        />
+                        <div className="flex flex-col">
+                            <span className="font-medium text-gray-900">{post.author.username}</span>
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <time>{post.createdAt}</time>
+                            </div>
                         </div>
                     </div>
+
+                    {
+                        (auth.user_id === post.author.id) &&
+                        <button
+                            disabled={isDeleting}
+                            onClick={deletePost}
+                            className="bg-rose-600 text-white rounded-md px-3 py-1 hover:cursor-pointer
+                            active:opacity-50"
+                        >
+                            {isDeleting ? "Deleting..." : "Delete Post"}
+                        </button>
+                    }
                 </div>
 
                 {/* Main content */}
@@ -136,7 +174,7 @@ export const DetailPost = () => {
                     {/* Comments list */}
                     <div className="space-y-8">
                         {post.comments.map(comment => (
-                            <Comment key={comment.id} comment={comment} />
+                            <Comment comment={comment} isReply={false} postId={postId!} key={comment.id} />
                         ))}
                     </div>
                 </div>
@@ -145,51 +183,4 @@ export const DetailPost = () => {
     );
 };
 
-interface CommentProps {
-    comment: CommentsinDetailedPost;
-    isReply?: boolean;
-}
 
-const Comment = ({ comment, isReply = false }: CommentProps) => {
-    return (
-        <div className={isReply ? "ml-12" : ""}>
-            <div className="flex gap-3">
-                <img
-                    src={comment.author.img}
-                    alt={comment.author.username}
-                    className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                />
-                <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-gray-900">{comment.author.username}</span>
-                        <span className="text-sm text-gray-500">
-                            {comment.createdAt}
-                        </span>
-                    </div>
-                    <p className="text-gray-800 leading-relaxed mb-3">{comment.text}</p>
-
-                    <div className="flex items-center gap-4 text-sm">
-                        <button className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                            <span>{comment.likes}</span>
-                        </button>
-                        <button className="text-gray-600 hover:text-gray-900 transition">
-                            Reply
-                        </button>
-                    </div>
-
-                    {/* Nested replies */}
-                    {comment.replies && comment.replies.length > 0 && (
-                        <div className="mt-6 space-y-6">
-                            {comment.replies.map(reply => (
-                                <Comment key={reply.id} comment={reply} isReply={true} />
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};

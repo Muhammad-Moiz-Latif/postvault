@@ -82,9 +82,11 @@ export interface CommentsinDetailedPost {
     author: {
         username: string,
         email: string,
-        img: string
+        img: string,
+        id: string
     },
     likes: number,
+    likedByMe: boolean,
     replies: CommentsinDetailedPost[]
 };
 
@@ -92,11 +94,13 @@ export type DetailedPostResponse = ApiResponse<{
     id: string,
     title: string,
     paragraph: string,
+    img: string,
     createdAt: string,
     author: {
         username: string,
         email: string,
-        img: string
+        img: string,
+        id: string
     },
     likes: number,
     likedbyme: boolean,
