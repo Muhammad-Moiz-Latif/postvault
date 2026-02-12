@@ -3,5 +3,6 @@ import type { DetailedPostResponse } from "../../types";
 
 export async function getDetailedPost(postId: string) {
     const response = await privateApi.get<DetailedPostResponse>(`/api/post/${postId}`);
+    console.log(response.data);
     return response.data;
 };

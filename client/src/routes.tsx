@@ -9,6 +9,8 @@ import { SideBarProvider } from "./context/sidebarContext";
 import { CreatePost } from "./features/posts/pages/CreatePost";
 import { ProtectedRoute } from "./components/ProtectedRoutes";
 import { DetailPost } from "./features/posts/pages/DetailPost";
+import MyPosts from "./features/user/pages/MyPosts";
+import { EditPost } from "./features/user/pages/EditPosts";
 
 
 export const router = createBrowserRouter(
@@ -60,6 +62,14 @@ export const router = createBrowserRouter(
                                     path: "posts/new",
                                     element: <CreatePost />,
                                 },
+                                {
+                                    path: "posts",
+                                    element: <MyPosts />,
+                                },
+                                {
+                                    path: "posts/edit/:postId",
+                                    element: <EditPost />
+                                }
                             ],
                         },
                     ],

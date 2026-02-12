@@ -14,7 +14,6 @@ import {
     User2,
     Settings,
 } from "lucide-react";
-import { useSidebar } from "../../../context/sidebarContext";
 import type React from "react";
 
 const NAV_ITEMS = [

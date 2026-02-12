@@ -36,7 +36,17 @@ export const userService = {
                     (
                         SELECT COUNT(*) FROM likepost lp where
                         lp."postId" = p.id
-                    ) AS likes 
+                    ) AS likes,
+                    EXISTS (
+                        SELECT 1 FROM likepost lp WHERE
+                        lp."authorId" = ${userId} 
+                        AND lp."postId" = p.id
+                    ) AS likedbyme,
+                    EXISTS (
+                        SELECT 1 FROM saved_posts sp WHERE
+                        sp."userId" = ${userId}
+                        AND sp."postId" = p.id
+                    ) AS savedbyme
                     FROM posts p WHERE p."authorId" = ${userId} ORDER BY p."createdAt" ASC
             `);
 

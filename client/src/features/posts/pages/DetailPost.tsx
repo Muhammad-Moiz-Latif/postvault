@@ -1,13 +1,15 @@
-import { Navigate, replace, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useDetailedPost } from "../queries/useDetailedPost"
 import { useReactToPost } from "../queries/useReactToPost";
 import { useState } from "react";
+import { Bookmark } from "lucide-react";
 import { useComment } from "../queries/useComment";
 import { useQueryClient } from "@tanstack/react-query";
 import { ToastContainer, toast } from "react-toastify";
 import { Comment } from "../components/Comment";
 import { useAuth } from "../../../context/authContext";
 import { useDeletePost } from "../queries/useDeletePost";
+import { useSavePost } from "../queries/useSavePost";
 
 export const DetailPost = () => {
     const { postId } = useParams();
@@ -18,12 +20,17 @@ export const DetailPost = () => {
     const { mutate: CommentOnPost, isPending: loadingComment } = useComment();
     const { mutate: ReactToPost } = useReactToPost(postId!);
     const { mutate: DeletePost, isPending: isDeleting } = useDeletePost();
+    const { mutate: SavePost } = useSavePost(postId!);
     const navigate = useNavigate();
     const post = data?.data!;
 
 
     function handleLike() {
         ReactToPost();
+    };
+
+    function handleSave() {
+        SavePost();
     };
 
     function handleComment() {
@@ -104,7 +111,13 @@ export const DetailPost = () => {
                             <div className="flex items-center gap-2 text-sm text-gray-500">
                                 <time>{post.createdAt}</time>
                             </div>
+                            <Bookmark
+                                onClick={handleSave}
+                                className={`hover:cursor-pointer ${post.savedbyme ? "text-rose-600 " : "text-zinc-400"} `}
+                            />
+
                         </div>
+
                     </div>
 
                     {

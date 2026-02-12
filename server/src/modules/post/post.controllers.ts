@@ -136,6 +136,7 @@ export const postController = {
         };
     },
 
+
     async editPost(req: Request, res: Response) {
         try {
             let { title, paragraph, tags, status } = req.body;

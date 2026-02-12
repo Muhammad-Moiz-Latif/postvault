@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LikeUnlikePost } from "../apis/LikeUnlikePost";
+import type { DetailedPostResponse } from "../../types";
 
 export function useReactToPost(postId: string) {
     const queryClient = useQueryClient();
@@ -13,10 +14,11 @@ export function useReactToPost(postId: string) {
 
             const previousValue = queryClient.getQueryData(["post", postId]);
 
-            queryClient.setQueryData(["post", postId], (old: any) => {
+            queryClient.setQueryData(["post", postId], (old: DetailedPostResponse) => {
                 if (!old?.data) return old;
-                
+
                 const likes = Number(old.data.likes);
+
 
                 const isLiked = old.data.likedbyme;
 

@@ -95,6 +95,7 @@ export type DetailedPostResponse = ApiResponse<{
     title: string,
     paragraph: string,
     img: string,
+    tags: string[],
     createdAt: string,
     author: {
         username: string,
@@ -103,8 +104,43 @@ export type DetailedPostResponse = ApiResponse<{
         id: string
     },
     likes: number,
+    status: "DRAFT" | "PUBLISHED",
     likedbyme: boolean,
+    savedbyme: boolean,
     comments: CommentsinDetailedPost[]
 }>;
 
 export type LikeUnlikePostResponse = ApiResponse<null>;
+
+
+export type MyPost = {
+    id: string,
+    title: string,
+    paragraph: string,
+    img: string,
+    tags: string[],
+    status: "DRAFT" | "PUBLISHED",
+    createdAt: string,
+    updatedAt: string,
+    publishedAt: string,
+    comments: number,
+    likes: number,
+    likedbyme: boolean,
+    savedbyme: boolean
+};
+
+export type MyPostsResponse = ApiResponse<[{
+    id: string,
+    title: string,
+    paragraph: string,
+    img: string,
+    tags: string[],
+    status: "DRAFT" | "PUBLISHED",
+    createdAt: string,
+    updatedAt: string,
+    publishedAt: string,
+    comments: number,
+    likes: number,
+    likedbyme: boolean,
+    savedbyme: boolean
+}]>;

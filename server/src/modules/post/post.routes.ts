@@ -11,9 +11,7 @@ router.get('/all-posts', postController.getAllPosts);
 
 router.get('/get-saved-posts', verifyJWT, postController.getAllSavedPosts);
 
-
 router.get('/:postId', verifyJWT, postController.getDetailedPost);
-
 
 router.post('/create', verifyJWT, upload.single("image"), postController.createPost);
 

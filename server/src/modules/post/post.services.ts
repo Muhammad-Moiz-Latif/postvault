@@ -29,7 +29,10 @@ export const postService = {
         return post;
     },
 
+
+
     async updatePost(postId: string, authorId: string, title?: string, paragraph?: string, tags?: string[], imgURL?: string | null, status?: "DRAFT" | "PUBLISHED") {
+
         const posts = await db.update(PostTable).set({
             authorId,
             title,
@@ -232,6 +235,8 @@ export const postService = {
                 p.title,
                 p.paragraph,
                 p.img,
+                p.tags,
+                p.status,
                 p."createdAt",
 
                 json_build_object(
