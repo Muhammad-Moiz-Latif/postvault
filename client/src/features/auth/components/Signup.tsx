@@ -82,31 +82,31 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                 <VerifyEmail tokenId={verificationTokenId} setVerifyModal={setShowVerifyModal} setIsLogin={setLogin} />
             </div>}
 
-            <div className='w-full h-full rounded-2xl border border-primary/40 relative'>
+            <div className='hidden lg:block w-full h-full rounded-2xl border border-primary/40 relative'>
                 <img src={bg} className='size-full rounded-2xl' />
-                <h1 className='absolute bottom-10 left-3 font-serif text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
-                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-lg'>Write without distraction. Share with intention.</p>
+                <h1 className='absolute bottom-10 left-3 font-serif text-3xl lg:text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
+                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-sm lg:text-lg'>Write without distraction. Share with intention.</p>
             </div>
-            <div className='w-full h-full flex flex-col justify-start pt-15 items-center relative'>
-                <img src={logo} className='size-24 object-contain absolute -top-5 left-5' />
-                <div className='mb-4 text-center'>
-                    <h1 className='text-center tracking-tight text-2xl font-sans text-foreground'>Create an account to write and publish</h1>
-                    <p className='text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign up.</p>
+            <div className='w-full h-full flex flex-col justify-start pt-8 lg:pt-15 items-center relative overflow-y-auto lg:overflow-visible'>
+                <img src={logo} className='size-16 lg:size-24 object-contain absolute -top-5 left-5' />
+                <div className='mb-4 text-center px-4'>
+                    <h1 className='text-center tracking-tight text-lg lg:text-2xl font-sans text-foreground'>Create an account to write and publish</h1>
+                    <p className='text-xs lg:text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign up.</p>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md">
-                    <div className="flex justify-center items-center bg-muted mx-20 p-0.75 rounded-[4px] mb-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-xs lg:max-w-md px-4 lg:px-0">
+                    <div className="flex justify-center items-center bg-muted mx-4 lg:mx-20 p-0.75 rounded-[4px] mb-4">
                         <button
                             type='button'
                             onClick={() => setLogin(true)}
-                            className={`hover:cursor-pointer tracking-tight font-sans ${isLogin ? "bg-primary text-primary-foreground" : "bg-zinc-300 text-secondary-foreground"} w-full h-8 rounded-l-[4px]`}
+                            className={`hover:cursor-pointer tracking-tight font-sans text-xs lg:text-sm ${isLogin ? "bg-primary text-primary-foreground" : "bg-zinc-300 text-secondary-foreground"} w-full h-8 rounded-l-[4px]`}
                         >
                             Login
                         </button>
                         <button
                             type='button'
                             onClick={() => setLogin(false)}
-                            className={`hover:cursor-pointer tracking-tight font-sans ${!isLogin ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"} w-full h-8 rounded-r-[4px]`}
+                            className={`hover:cursor-pointer tracking-tight font-sans text-xs lg:text-sm ${!isLogin ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"} w-full h-8 rounded-r-[4px]`}
                         >
                             Signup
                         </button>
@@ -115,11 +115,11 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                     {/* ENTER PROFILE PICTURE */}
                     <div className="flex justify-center mb-1.5">
                         <label htmlFor="profile-picture" className="cursor-pointer">
-                            <div className="size-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border hover:border-primary transition-all">
+                            <div className="size-16 lg:size-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border hover:border-primary transition-all">
                                 {previewUrl ? (
                                     <img src={previewUrl} alt="Profile preview" className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="text-xl">📷</div>
+                                    <div className="text-lg lg:text-xl">📷</div>
                                 )}
                             </div>
                             <input
@@ -135,11 +135,11 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                     {errorMessage && <p className="text-destructive text-xs text-center mb-2 font-sans">{errorMessage}</p>}
 
                     {/* ENTER USERNAME */}
-                    <div className="grid grid-cols-2 gap-2.5 mb-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 mb-3">
                         <div>
                             <input
                                 {...register("username")}
-                                className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                className="w-full h-8 rounded-[6px] bg-background border border-border text-xs lg:text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
                                 type="text"
                                 placeholder="Enter your username"
                             />
@@ -150,7 +150,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                         <div>
                             <input
                                 {...register("email")}
-                                className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                className="w-full h-8 rounded-[6px] bg-background border border-border text-xs lg:text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
                                 type="email"
                                 placeholder="Enter your email address"
                             />
@@ -162,7 +162,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                             <div className="flex relative">
                                 <input
                                     {...register('password')}
-                                    className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                    className="w-full h-8 rounded-[6px] bg-background border border-border text-xs lg:text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
                                     type={isVisible ? "text" : "password"}
                                     placeholder="Enter your password"
                                 />
@@ -170,7 +170,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                                     type='button'
                                     className='hover:cursor-pointer absolute right-2 bottom-1.5'
                                     onClick={() => setIsVisible((prev) => !prev)}>
-                                    <img src={isVisible ? show : hide} className='size-5' />
+                                    <img src={isVisible ? show : hide} className='size-4 lg:size-5' />
                                 </button>
                             </div>
 
@@ -182,7 +182,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                             <div className="flex relative">
                                 <input
                                     {...register('confirmPassword')}
-                                    className="w-full h-8 rounded-[6px] bg-background border border-border text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
+                                    className="w-full h-8 rounded-[6px] bg-background border border-border text-xs lg:text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
                                     type={Visible ? "text" : "password"}
                                     placeholder="Confirm your password"
                                 />
@@ -190,7 +190,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                                     type='button'
                                     className='hover:cursor-pointer absolute right-2 bottom-1.5'
                                     onClick={() => setVisible((prev) => !prev)}>
-                                    <img src={Visible ? show : hide} className='size-5' />
+                                    <img src={Visible ? show : hide} className='size-4 lg:size-5' />
                                 </button>
                             </div>
 
@@ -202,7 +202,7 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                     <button
                         type="submit"
                         disabled={isPending}
-                        className="bg-primary text-primary-foreground hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50 font-sans text-sm font-medium hover:bg-primary/90 transition"
+                        className="bg-primary text-primary-foreground hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50 font-sans text-xs lg:text-sm font-medium hover:bg-primary/90 transition"
                     >
                         {isPending ? "Creating account..." : "Create account"}
                     </button>
@@ -218,14 +218,14 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                         onClick={() => {
                             window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
                         }}
-                        className="w-full h-9 text-sm hover:cursor-pointer bg-background rounded-[6px] font-base border border-border transition flex justify-center items-center gap-1 overflow-hidden text-foreground font-sans hover:text-accent-foreground"
+                        className="w-full h-9 text-xs lg:text-sm hover:cursor-pointer bg-background rounded-[6px] font-base border border-border transition flex justify-center items-center gap-1 overflow-hidden text-foreground font-sans hover:text-accent-foreground"
                     >
                         <span>Continue with</span>
-                        <img src={google} className='size-10 mt-0.5' />
+                        <img src={google} className='size-8 lg:size-10 mt-0.5' />
                     </div>
                 </form>
-                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-0 left-5'>Copyright 2025 @ PostVault LTD.</h1>
-                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-0 right-5'>Privacy Policy</h1>
+                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 left-3 lg:left-5 text-center lg:text-left'>Copyright 2025 @ PostVault LTD.</h1>
+                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 right-3 lg:right-5 text-center lg:text-right'>Privacy Policy</h1>
             </div>
         </div>
     )
