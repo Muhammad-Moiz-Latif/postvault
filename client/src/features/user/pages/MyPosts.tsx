@@ -2,11 +2,17 @@ import { useState } from "react";
 import type { MyPost } from "../../types";
 import { useMyPosts } from "../queries/useMyPosts";
 import { useNavigate } from "react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { detailedPostQueryOptions } from "../../posts/queries/useDetailedPost";
+import { useDeletePost } from "../../posts/queries/useDeletePost";
+import { toast } from "react-toastify";
 
 type FilterType = "ALL" | "DRAFT" | "PUBLISHED";
 
 export default function MyPosts() {
+    const queryClient = useQueryClient();
     const { data, isLoading } = useMyPosts();
+    const { mutate } = useDeletePost();
     const [filter, setFilter] = useState<FilterType>("ALL");
     const navigate = useNavigate();
     const posts = data?.data ?? [];
@@ -16,6 +22,18 @@ export default function MyPosts() {
         return post.status === filter;
     });
 
+    function handleDeletePost(postId: string) {
+        mutate(postId, {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['all-posts'] });
+                queryClient.invalidateQueries({ queryKey: ['my-posts'] });
+            },
+            onError: (error) => {
+                console.error(error);
+                toast.error("Could not delete post");
+            }
+        })
+    }
     if (isLoading) {
         return (
             <div className="w-full h-screen flex justify-center items-center">
@@ -55,6 +73,9 @@ export default function MyPosts() {
 
                 {filteredPosts.map((post: MyPost) => (
                     <div
+                        onMouseEnter={() => {
+                            queryClient.prefetchQuery(detailedPostQueryOptions(post.id))
+                        }}
                         onClick={() => navigate(`edit/${post.id}`)}
                         key={post.id}
                         className="border rounded-xl p-5 hover:cursor-pointer shadow-sm bg-white"
@@ -107,7 +128,13 @@ export default function MyPosts() {
                                 </button>
                             )}
 
-                            <button className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleDeletePost(post.id)
+                                }}
+                                className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 hover:cursor-pointer">
                                 Delete
                             </button>
                         </div>

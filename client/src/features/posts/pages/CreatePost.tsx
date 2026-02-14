@@ -2,12 +2,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler, useFieldArray } from "react-hook-form";
 import z from "zod"
-import { useBlocker } from "react-router";
+import { useBlocker, useNavigate } from "react-router";
 import { useDraftPost } from "../queries/useDraftPost";
 import { ToastContainer, toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { usePublishPost } from "../queries/usePublishPost";
+import { ArrowLeft, Loader2, X } from "lucide-react";
 
 const PostSchema = z.object({
     title: z.string().min(10, "Title must be at least 10 characters").max(30, "Title cannot be longer than 30 characters"),
@@ -27,7 +28,7 @@ export const CreatePost = () => {
     const queryClient = useQueryClient();
     const { mutate: PublishPost, isPending } = usePublishPost();
     const { mutate: SaveDraft, isPending: DraftPending } = useDraftPost();
-
+    const navigate = useNavigate();
     const { register, handleSubmit, control, reset, getValues, formState: { errors, isDirty }, watch } = useForm<PostSchemaType>({
         resolver: zodResolver(PostSchema),
         defaultValues: {
@@ -115,116 +116,195 @@ export const CreatePost = () => {
     };
 
     return (
-        <div className="font-sans p-3 overflow-x-hidden relative">
-            <ToastContainer
-                position='top-center'
-                closeOnClick
-                draggable
-                hideProgressBar={true}
-            />
-            <h1 className="text-3xl tracking-tight">Create your post</h1>
-            {errorMessage && <h1 className="text-destructive font-sans text-sm tracking-tight my-1 text-center">{errorMessage}</h1>}
-            <form className="w-full max-w-xl flex flex-col"
-                onSubmit={handleSubmit(onSubmit)}
+        <div className="min-h-screen bg-background">
+            <ToastContainer position="top-center" hideProgressBar />
 
-            >
+            {/* Sticky Header */}
+            <div className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-10">
+                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <ArrowLeft size={16} />
+                        <span>Back</span>
+                    </button>
 
-                {/* ENTER TITLE */}
-                <input
-                    type="text"
-                    {...register("title")}
-                    className="w-full h-9 rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
-                    placeholder="Enter a title"
-                />
-                {errors.title && <h1 className="text-red-500 mb-2 mt-0.5 text-xs tracking-tight">{errors.title.message}</h1>}
-
-                {/* ENTER PARAGRAPH */}
-                <textarea
-                    rows={5}
-                    {...register("paragraph")}
-                    className="w-full rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
-                    placeholder="Enter your paragraph"
-                />
-                {errors.paragraph && <h1 className="text-red-500 mb-2 mt-0.5 text-xs tracking-tight">{errors.paragraph.message}</h1>}
-
-                {/* SELECT IMAGE */}
-                <div className="flex mb-1.5">
-                    <label htmlFor="profile-picture" className="cursor-pointer">
-                        <div className="w-96 h-40 rounded-md bg-muted flex items-center justify-center border-2 border-border hover:border-primary transition-all">
-                            {previewUrl ? (
-                                <img src={previewUrl} alt="Profile preview" className="w-full h-full object-cover rounded-md" />
-                            ) : (
-                                <div className="text-xl">📷</div>
-                            )}
-                        </div>
-                        <input
-                            {...register("image")}
-                            id="profile-picture"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                        />
-                    </label>
+                    <button
+                        type="submit"
+                        form="post-form"
+                        disabled={isPending}
+                        className="px-5 py-2 bg-foreground text-background rounded-lg text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors flex items-center gap-2"
+                    >
+                        {isPending ? (
+                            <>
+                                <Loader2 size={14} className="animate-spin" />
+                                Publishing...
+                            </>
+                        ) : "Publish Post"}
+                    </button>
                 </div>
-                {errors.image && <p className="text-destructive text-xs text-center mb-2 mt-0.5 font-sans">{errors.image.message}</p>}
+            </div>
 
-                {/* SELECT TAGS */}
-                <input
-                    type="text"
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
+            <div className="max-w-4xl mx-auto px-4 py-12">
 
-                            const value = e.currentTarget.value.trim();
-                            if (!value) return;
-                            if (fields.length >= 5) return;
-
-                            append({ value });
-                            e.currentTarget.value = "";
-                        }
-                    }}
-                    className="w-full rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
-                    placeholder="Press Enter to add tags"
-                />
-
-                <div className="flex flex-wrap gap-2 mb-2">
-                    {fields.map((field, index) => (
-                        <div
-                            key={field.id}
-                            className="bg-muted px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                        >
-                            {field.value}
-                            <button
-                                type="button"
-                                onClick={() => remove(index)}
-                                className="text-red-500 hover:text-red-700"
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ))}
-                </div>
-
-                {errors.tags && (
-                    <p className="text-destructive text-xs mb-2">
-                        {errors.tags.message}
-                    </p>
+                {/* Error Message */}
+                {errorMessage && (
+                    <div className="mb-8 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                        <p className="text-sm text-destructive">{errorMessage}</p>
+                    </div>
                 )}
 
-                {/* SUBMIT BUTTON */}
-                <button
-                    type="submit"
-                    disabled={isPending}
-                    className="bg-primary text-primary-foreground hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50 font-sans text-sm font-medium hover:bg-primary/90 transition"
+                <form
+                    id="post-form"
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="space-y-8"
                 >
-                    {isPending ? "Creating.." : "Create Post"}
-                </button>
-            </form>
+                    {/* Cover Image */}
+                    <div className="space-y-3">
+                        <label className="text-sm font-medium text-foreground block">
+                            Cover Image <span className="text-muted-foreground font-normal">(optional)</span>
+                        </label>
+
+                        <label
+                            htmlFor="profile-picture"
+                            className="block border-2 border-dashed border-border rounded-lg hover:border-muted-foreground transition-colors cursor-pointer overflow-hidden"
+                        >
+                            <div className="h-64 flex items-center justify-center bg-muted/30">
+                                {previewUrl ? (
+                                    <img
+                                        src={previewUrl}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="text-center text-muted-foreground">
+                                        <div className="mx-auto mb-3 p-3 rounded-full bg-muted w-fit">
+                                            {/* <Image size={24} /> */}
+                                        </div>
+                                        <p className="text-sm font-medium">Click to upload cover image</p>
+                                        <p className="text-xs mt-1">PNG, JPG up to 10MB</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <input
+                                {...register("image")}
+                                id="profile-picture"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                            />
+                        </label>
+
+                        {errors.image && (
+                            <p className="text-xs text-destructive">
+                                {errors.image.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Title */}
+                    <div className="space-y-2">
+                        <label htmlFor="title" className="sr-only">
+                            Title
+                        </label>
+                        <input
+                            {...register("title")}
+                            id="title"
+                            placeholder="Title"
+                            className="w-full text-4xl md:text-5xl font-bold text-foreground placeholder:text-muted-foreground/40 outline-none bg-transparent border-none p-0"
+                        />
+                        {errors.title && (
+                            <p className="text-xs text-destructive">
+                                {errors.title.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Body */}
+                    <div className="space-y-2">
+                        <label htmlFor="paragraph" className="sr-only">
+                            Body
+                        </label>
+                        <textarea
+                            rows={15}
+                            {...register("paragraph")}
+                            id="paragraph"
+                            placeholder="Tell your story..."
+                            className="w-full text-lg leading-relaxed text-foreground placeholder:text-muted-foreground/40 outline-none resize-none bg-transparent border-none p-0"
+                        />
+                        {errors.paragraph && (
+                            <p className="text-xs text-destructive">
+                                {errors.paragraph.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="h-px bg-border my-12" />
+
+                    {/* Tags */}
+                    <div className="space-y-4">
+                        <label className="text-sm font-medium text-foreground block">
+                            Tags <span className="text-muted-foreground font-normal">(up to 5)</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const value = e.currentTarget.value.trim();
+                                    if (!value) return;
+                                    if (fields.length >= 5) return;
+                                    append({ value });
+                                    e.currentTarget.value = "";
+                                }
+                            }}
+                            placeholder="Type a tag and press Enter"
+                            className="w-full px-4 py-3 border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground transition-shadow"
+                        />
+
+                        {fields.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {fields.map((field, index) => (
+                                    <div
+                                        key={field.id}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-muted text-foreground rounded-full text-sm"
+                                    >
+                                        <span>{field.value}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => remove(index)}
+                                            className="text-muted-foreground hover:text-destructive transition-colors"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {errors.tags && (
+                            <p className="text-xs text-destructive">
+                                {errors.tags.message}
+                            </p>
+                        )}
+                    </div>
+                </form>
+            </div>
 
             {blocker.state === 'blocked' && (
-                <ConfirmDialog onSave={onSave} onCancel={onCancel} onDiscard={onDiscard} isPending={DraftPending}/>
+                <ConfirmDialog
+                    onSave={onSave}
+                    onCancel={onCancel}
+                    onDiscard={onDiscard}
+                    isPending={DraftPending}
+                />
             )}
         </div>
-    )
+    );
+
 };
 

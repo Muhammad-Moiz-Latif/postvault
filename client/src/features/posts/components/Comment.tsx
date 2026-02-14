@@ -2,204 +2,291 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useReactToComment } from "../queries/useReactToComment";
 import { useReply } from "../queries/useReply";
 import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import type { CommentsinDetailedPost } from "../../types";
 import { useAuth } from "../../../context/authContext";
 import { useDeleteComment } from "../queries/useDeleteComment";
 import { useEditComment } from "../queries/useEditComment";
+import { Heart, MoreVertical, Loader2 } from "lucide-react";
 
 interface CommentProps {
     comment: CommentsinDetailedPost;
-    isReply?: boolean;
-    postId: string
+    depth: number;
+    postId: string;
 }
 
-export const Comment = ({ comment, isReply = false, postId }: CommentProps) => {
+const MAX_DEPTH = 1; // Only allow 1 level of nesting (comment -> reply)
+
+export const Comment = ({ comment, depth, postId }: CommentProps) => {
     const queryClient = useQueryClient();
     const { auth } = useAuth();
-    const { mutate: ReactToComment } = useReactToComment(postId!);
+    const { mutate: ReactToComment } = useReactToComment(postId);
     const { mutate: ReplyToComment, isPending: replying } = useReply();
-    const { mutate: DeleteComment, isPending } = useDeleteComment(postId);
+    const { mutate: DeleteComment, isPending: deleting } = useDeleteComment(postId);
     const { mutate: EditComment, isPending: editing } = useEditComment(postId);
+
     const [isEdit, setIsEdit] = useState(false);
     const [editValue, setEditValue] = useState(comment.text);
     const [isReplying, setIsReplying] = useState(false);
     const [replyText, setReplyText] = useState("");
+    const [showActions, setShowActions] = useState(false);
 
-    function handleCommentLike(commentId: string) {
-        ReactToComment(commentId, {
+    const isOwner = auth.user_id === comment.author.id;
+    const canReply = depth < MAX_DEPTH;
+
+    // Format date
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+
+        if (diffInHours < 1) return "Just now";
+        if (diffInHours < 24) return `${diffInHours}h ago`;
+        if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
+
+        return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined
+        });
+    };
+
+    function handleCommentLike() {
+        ReactToComment(comment.id, {
             onError: (error) => {
                 console.error(error);
-                toast.error("An error occurred while liking this comment");
+                toast.error("Failed to like comment");
             }
         });
     }
 
     function handleReplySubmit() {
+        if (!replyText.trim()) return;
 
-        ReplyToComment({ postId, parentId: comment.id, comment: replyText }, {
-            onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['post', postId] });
-                setReplyText("");
-                setIsReplying(false);
-            },
-            onError: (error) => {
-                console.error(error);
-                toast.error("Failed to reply");
+        ReplyToComment(
+            { postId, parentId: comment.id, comment: replyText },
+            {
+                onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: ['post', postId] });
+                    setReplyText("");
+                    setIsReplying(false);
+                    toast.success("Reply published");
+                },
+                onError: (error) => {
+                    console.error(error);
+                    toast.error("Failed to reply");
+                }
             }
-        });
-    };
+        );
+    }
 
-    function handleDeleteComment(commentId: string) {
-        DeleteComment({ postId, commentId }, {
-            onError: (error) => {
-                console.error(error);
-                toast.error("Could not delete comment");
+    function handleDeleteComment() {
+        if (!confirm("Delete this comment? This action cannot be undone.")) return;
+
+        DeleteComment(
+            { postId, commentId: comment.id },
+            {
+                onSuccess: () => {
+                    toast.success("Comment deleted");
+                },
+                onError: (error) => {
+                    console.error(error);
+                    toast.error("Failed to delete comment");
+                }
             }
-        })
-    };
+        );
+    }
 
     function handleEdit() {
-        EditComment({ commentId: comment.id, postId, comment: editValue }, {
-            onSuccess: () => {
-                setIsEdit(false);
-            },
-            onError: (error) => {
-                console.error(error);
-                toast.error("Could not edit comment");
+        if (!editValue.trim()) return;
+
+        EditComment(
+            { commentId: comment.id, postId, comment: editValue },
+            {
+                onSuccess: () => {
+                    setIsEdit(false);
+                    toast.success("Comment updated");
+                },
+                onError: (error) => {
+                    console.error(error);
+                    toast.error("Failed to update comment");
+                }
             }
-        })
-    };
+        );
+    }
 
     return (
-        <div className={isReply ? "ml-12" : ""}>
-            <ToastContainer
-                position='top-center'
-                closeOnClick
-                draggable
-                hideProgressBar={true}
-            />
+        <div className={depth > 0 ? "ml-12 pt-6 border-l-2 border-border pl-6" : ""}>
             <div className="flex gap-3">
+                {/* Avatar */}
                 <img
                     src={comment.author.img}
                     alt={comment.author.username}
-                    className="w-10 h-10 rounded-full object-cover shrink-0"
+                    className="size-10 rounded-full object-cover flex-shrink-0"
                 />
-                <div className="flex-1">
-                    <div className="flex justify-between">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium text-gray-900">
+
+                <div className="flex-1 min-w-0">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium text-foreground text-sm">
                                 {comment.author.username}
                             </span>
-                            <span className="text-sm text-gray-500">
-                                {comment.createdAt}
+                            <span className="text-xs text-muted-foreground">
+                                {formatDate(comment.createdAt)}
                             </span>
                         </div>
-                        {
-                            (auth.user_id === comment.author.id) &&
-                            <div className="flex gap-2">
+
+                        {/* Actions menu */}
+                        {isOwner && (
+                            <div className="relative">
                                 <button
-                                    disabled={isPending}
-                                    className="bg-rose-600 text-white px-3 py-1 rounded-md hover:cursor-pointer active:opacity-55"
-                                    onClick={() => handleDeleteComment(comment.id)}
-                                >{isPending ? "Deleting..." : "Delete"}</button>
-                                <button
-                                    className="bg-amber-600 text-white px-3 py-1 rounded-md hover:cursor-pointer active:opacity-55"
-                                    onClick={() => setIsEdit((prev) => !prev)}
-                                >{isEdit ? "Cancel" : "Edit"}</button>
+                                    onClick={() => setShowActions(!showActions)}
+                                    className="p-1 rounded-full hover:bg-muted transition-colors"
+                                >
+                                    <MoreVertical size={16} className="text-muted-foreground" />
+                                </button>
+
+                                {showActions && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-10"
+                                            onClick={() => setShowActions(false)}
+                                        />
+                                        <div className="absolute right-0 top-8 z-20 w-32 bg-background border border-border rounded-lg shadow-lg overflow-hidden">
+                                            <button
+                                                onClick={() => {
+                                                    setIsEdit(true);
+                                                    setShowActions(false);
+                                                }}
+                                                className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    handleDeleteComment();
+                                                    setShowActions(false);
+                                                }}
+                                                className="w-full px-4 py-2 text-left text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                                            >
+                                                {deleting ? "Deleting..." : "Delete"}
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
-                        }
+                        )}
                     </div>
 
-
-                    <input
-                        disabled={!isEdit}
-                        type="text"
-                        value={isEdit ? editValue : comment.text}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className={`text-gray-800 leading-relaxed mb-3 ${isEdit && "border rounded-md border-zinc-300 outline-none p-1"}`}
-                    />
-
-
-                    <div className="flex items-center gap-4 text-sm">
-                        <button
-                            onClick={() => handleCommentLike(comment.id)}
-                            className={`flex items-center gap-1 ${comment.likedByMe
-                                ? "text-rose-600"
-                                : "text-gray-600"
-                                } hover:opacity-60 transition hover:cursor-pointer`}
-                        >
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                />
-                            </svg>
-                            <span>{comment.likes}</span>
-                        </button>
-
-                        {
-                            !isReply && (
-                                <button
-                                    onClick={() => setIsReplying(!isReplying)}
-                                    className="text-gray-600 hover:text-gray-900 transition"
-                                >
-                                    {(isReplying) ? "Cancel" : "Reply"}
-                                </button>
-                            )
-                        }
-
-                        {
-                            isEdit && (
+                    {/* Content */}
+                    {isEdit ? (
+                        <div className="mb-3">
+                            <textarea
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                rows={3}
+                                className="w-full p-3 border border-border rounded-lg bg-background text-foreground resize-none outline-none focus:ring-2 focus:ring-ring transition-shadow text-sm"
+                            />
+                            <div className="flex gap-2 mt-2">
                                 <button
                                     onClick={handleEdit}
-                                    className="bg-black rounded-md text-white p-1 hover:cursor-pointer"
+                                    disabled={editing || !editValue.trim()}
+                                    className="px-4 py-1.5 bg-foreground text-background text-sm rounded-lg font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors"
                                 >
-                                    {editing ? "Editing..." : "Edit Comment"}
+                                    {editing ? (
+                                        <span className="flex items-center gap-2">
+                                            <Loader2 size={12} className="animate-spin" />
+                                            Saving...
+                                        </span>
+                                    ) : "Save"}
                                 </button>
-                            )
-                        }
+                                <button
+                                    onClick={() => {
+                                        setIsEdit(false);
+                                        setEditValue(comment.text);
+                                    }}
+                                    className="px-4 py-1.5 text-sm rounded-lg hover:bg-muted transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-foreground text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+                            {comment.text}
+                        </p>
+                    )}
 
-                    </div>
+                    {/* Actions */}
+                    {!isEdit && (
+                        <div className="flex items-center gap-4 text-sm">
+                            <button
+                                onClick={handleCommentLike}
+                                className="flex items-center gap-1.5 group"
+                            >
+                                <Heart
+                                    size={16}
+                                    className={`transition-colors ${comment.likedByMe
+                                            ? "fill-rose-500 text-rose-500"
+                                            : "text-muted-foreground group-hover:text-foreground"
+                                        }`}
+                                    strokeWidth={1.5}
+                                />
+                                <span className={`text-xs ${comment.likedByMe
+                                        ? "text-rose-500"
+                                        : "text-muted-foreground"
+                                    }`}>
+                                    {comment.likes}
+                                </span>
+                            </button>
+
+                            {canReply && (
+                                <button
+                                    onClick={() => setIsReplying(!isReplying)}
+                                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                    {isReplying ? "Cancel" : "Reply"}
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     {/* Reply Input */}
-                    {isReplying && (
+                    {isReplying && canReply && (
                         <div className="mt-4">
                             <textarea
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
-                                placeholder="Write your reply..."
-                                rows={2}
-                                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:border-gray-900 transition"
+                                placeholder="Write a reply..."
+                                rows={3}
+                                className="w-full p-3 border border-border rounded-lg bg-background text-foreground resize-none outline-none focus:ring-2 focus:ring-ring transition-shadow text-sm"
                             />
-
-                            <div className="flex justify-end mt-2">
+                            <div className="flex justify-end gap-2 mt-2">
                                 <button
-                                    disabled={replying}
+                                    disabled={replying || !replyText.trim()}
                                     onClick={handleReplySubmit}
-                                    className="px-4 py-1.5 bg-gray-900 text-white rounded-full text-sm hover:bg-gray-800 transition"
+                                    className="px-4 py-1.5 bg-foreground text-background text-sm rounded-lg font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors"
                                 >
-                                    {replying ? "Replying..." : "Reply"}
+                                    {replying ? (
+                                        <span className="flex items-center gap-2">
+                                            <Loader2 size={12} className="animate-spin" />
+                                            Replying...
+                                        </span>
+                                    ) : "Reply"}
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {/* Nested replies */}
-                    {comment.replies && comment.replies.length > 0 && (
+                    {/* Nested Replies */}
+                    {comment.replies?.length > 0 && (
                         <div className="mt-6 space-y-6">
                             {comment.replies.map((reply: any) => (
                                 <Comment
                                     key={reply.id}
                                     comment={reply}
-                                    isReply={true}
+                                    depth={depth + 1}
                                     postId={postId}
                                 />
                             ))}

@@ -96,7 +96,34 @@ export const userService = {
                         WHERE lc."authorId" = u.id
                     ),
                     '[]'::json
-                ) AS liked_comments
+                ) AS liked_comments,
+
+                -- saved posts
+                COALESCE(
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', p.id,
+                                'img', p.img,
+                                'paragraph', p.paragraph,
+                                'title', p.title,
+                                'publishedAt', p."publishedAt",
+                                'author', (
+                                    json_build_object(
+                                        'id' , au.id,
+                                        'username' , au.username,
+                                        'img' , au.img
+                                    )
+                                )
+                            )
+                        ) FROM saved_posts sp
+                          JOIN posts p ON
+                          sp."postId" = p.id
+                          JOIN users au ON
+                          p."authorId" = au.id 
+                          WHERE  sp."userId" = u.id
+                    ), '[]'::json
+                ) AS saved_posts
 
             FROM users u
             WHERE u.id = ${userId};          

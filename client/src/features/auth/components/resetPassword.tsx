@@ -77,6 +77,11 @@ export const ResetPassword = () => {
             <h1 className="font-sans text-2xl tracking-tight">Set new password</h1>
             <p className="font-sans text-sm tracking-tight text-zinc-500">Must be at least 8 characters</p>
             <form className="mb-4 flex flex-col w-1/2 px-7" onSubmit={handleSubmit(onSubmit)}>
+                {errorMessage && (
+                    <div className="p-3 mb-4 rounded-md bg-destructive/10 text-destructive text-sm text-center font-medium">
+                        {errorMessage}
+                    </div>
+                )}
                 <div className="mb-2">
                     <label htmlFor="password" className="block text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
                         Password

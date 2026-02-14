@@ -5,7 +5,7 @@ import useLogin from '../queries/useLogin'
 import { useAuth } from '../../../context/authContext';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import EnterEmail from './ui/input-email';
 import logo from '../../../assets/logo.png';
 import google from '../../../assets/google.png';
@@ -33,6 +33,14 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState("");
     const { setAuth } = useAuth();
+    const [animationComplete, setAnimationComplete] = useState(false);
+
+    // Play animation only on initial mount
+    useEffect(() => {
+        setAnimationComplete(false);
+        const timer = setTimeout(() => setAnimationComplete(true), 800); // Wait for all animations to complete
+        return () => clearTimeout(timer);
+    }, []);
 
     const onSubmit: SubmitHandler<LoginForm> = async (data) => {
         mutate(data, {
@@ -69,27 +77,29 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
             </div>}
 
 
-            <div className='w-full h-full rounded-2xl border border-primary/40 relative'>
+            <div className={`hidden lg:block w-full h-full rounded-2xl border border-primary/40 relative ${!animationComplete ? 'animate-slide-left' : ''}`}>
                 <img src={bg} className='size-full rounded-2xl' />
-                <h1 className='absolute bottom-10 left-3 font-serif text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
-                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-lg'>Write without distraction. Share with intention.</p>
+                <h1 className='absolute bottom-10 left-3 font-serif text-3xl lg:text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
+                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-sm lg:text-lg'>Write without distraction. Share with intention.</p>
             </div>
-            <div className='w-full h-full flex flex-col justify-between py-20 items-center relative'>
-                <img src={logo} className='size-24 object-contain absolute -top-5 left-5' />
-                <div className='mb-4 text-center'>
-                    <h1 className='text-center tracking-tight text-2xl font-sans text-foreground'>Continue where you left off</h1>
-                    <p className='text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign in.</p>
+            {/* Removed animation from parent container - only apply to individual elements */}
+            <div className="w-full h-full flex flex-col justify-between py-10 lg:py-20 items-center relative">
+                <img src={logo} className={`size-7 lg:size-10 object-contain absolute top-0 left-[48%] lg:left-[46%] ${!animationComplete ? 'animate-slide-down' : ''}`} style={{ animationDelay: !animationComplete ? '0.1s' : '0s' }} />
+                <div className={`mb-4 text-center px-4 ${!animationComplete ? 'animate-slide-down' : ''}`} style={{ animationDelay: !animationComplete ? '0.2s' : '0s' }}>
+                    <h1 className='text-center tracking-tight text-xl lg:text-2xl font-sans text-foreground'>Continue where you left off</h1>
+                    <p className='text-xs lg:text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign in.</p>
                 </div>
 
                 <form
                     onSubmit={handleSubmit(onSubmit)}
-                    className="w-full max-w-sm"
+                    className={`w-full max-w-xs lg:max-w-sm px-4 lg:px-0 ${!animationComplete ? 'animate-slide-down' : ''}`}
+                    style={{ animationDelay: !animationComplete ? '0.3s' : '0s' }}
                 >
-                    <div className="flex justify-center items-center bg-muted mx-20 p-0.75 rounded-[4px]">
+                    <div className="flex justify-center items-center bg-muted mx-4 lg:mx-20 p-0.75 rounded-[4px]">
                         <button
                             type='button'
                             onClick={() => setLogin(true)}
-                            className={`hover:cursor-pointer tracking-tight font-sans ${isLogin ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}  w-full h-8 rounded-l-[4px]`}
+                            className={`hover:cursor-pointer tracking-tight font-sans text-xs lg:text-sm ${isLogin ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}  w-full h-8 rounded-l-[4px]`}
                         >
                             Login
                         </button>
@@ -97,24 +107,24 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                         <button
                             type='button'
                             onClick={() => setLogin(false)}
-                            className={`hover:cursor-pointer tracking-tight font-sans ${!isLogin ? "bg-primary text-primary-foreground" : "bg-zinc-300 text-secondary-foreground"}  w-full h-8 rounded-r-[4px]`}
+                            className={`hover:cursor-pointer tracking-tight font-sans text-xs lg:text-sm ${!isLogin ? "bg-primary text-primary-foreground" : "bg-zinc-300 text-secondary-foreground"}  w-full h-8 rounded-r-[4px]`}
                         >
                             Signup
                         </button>
                     </div>
 
-                    {errorMessage && <h1 className="text-destructive font-sans text-sm tracking-tight my-1 text-center">{errorMessage}</h1>}
+                    {errorMessage && <h1 className="text-destructive font-sans text-xs lg:text-sm tracking-tight my-1 text-center">{errorMessage}</h1>}
 
                     {/* ENTER EMAIL */}
                     <div className="mb-2">
-                        <label htmlFor="email" className="block text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
+                        <label htmlFor="email" className="block text-xs lg:text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
                             Email
                         </label>
                         <input
                             id="email"
                             {...register("email")}
                             placeholder="you@example.com"
-                            className={`w-full px-4 text-sm py-2 border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.email ? 'border-destructive' : 'border-border'
+                            className={`w-full px-3 lg:px-4 text-xs lg:text-sm py-2 border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.email ? 'border-destructive' : 'border-border'
                                 }`}
                         />
                         {errors.email && (
@@ -124,7 +134,7 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
 
                     {/* ENTER PASSWORD */}
                     <div className="relative">
-                        <label htmlFor="password" className="block text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
+                        <label htmlFor="password" className="block text-xs lg:text-sm tracking-tight font-base text-muted-foreground mb-0.5 font-sans">
                             Password
                         </label>
                         <div className='flex relative'>
@@ -133,14 +143,14 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                                 type={isVisible ? "text" : "password"}
                                 {...register("password")}
                                 placeholder="Enter your password"
-                                className={`w-full px-4 py-2 text-sm border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.password ? 'border-destructive' : 'border-border'
+                                className={`w-full px-3 lg:px-4 py-2 text-xs lg:text-sm border rounded-[6px] outline-none focus:ring-2 focus:ring-ring bg-background text-foreground font-sans ${errors.password ? 'border-destructive' : 'border-border'
                                     }`}
                             />
                             <button
                                 type='button'
                                 className='hover:cursor-pointer absolute right-2 bottom-2'
                                 onClick={() => setIsVisible((prev) => !prev)}>
-                                <img src={isVisible ? show : hide} className='size-5' />
+                                <img src={isVisible ? show : hide} className='size-4 lg:size-5' />
                             </button>
                         </div>
 
@@ -162,7 +172,7 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                     <button
                         type="submit"
                         disabled={isPending}
-                        className="w-full text-sm hover:cursor-pointer bg-primary text-primary-foreground py-2 rounded-[6px] font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition font-sans"
+                        className="w-full text-xs lg:text-sm hover:cursor-pointer bg-primary text-primary-foreground py-2 rounded-[6px] font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition font-sans"
                     >
                         {isPending ? 'Logging in...' : 'Login'}
                     </button>
@@ -178,15 +188,15 @@ export default function Login({ isLogin, setLogin }: { isLogin: boolean, setLogi
                         onClick={() => {
                             window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
                         }}
-                        className="w-full h-9 text-sm hover:cursor-pointer bg-background rounded-[6px] font-base border border-border disabled:bg-muted disabled:cursor-not-allowed transition flex justify-center items-center gap-1 overflow-hidden text-foreground font-sans"
+                        className="w-full h-9 text-xs lg:text-sm hover:cursor-pointer bg-background rounded-[6px] font-base border border-border disabled:bg-muted disabled:cursor-not-allowed transition flex justify-center items-center gap-1 overflow-hidden text-foreground font-sans"
                     >
                         <span>Continue with</span>
-                        <img src={google} className='size-10 mt-0.5' />
+                        <img src={google} className='size-8 lg:size-10 mt-0.5' />
                     </div>
                 </form>
-                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-0 left-5'>Copyright 2025 @ PostVault LTD.</h1>
-                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-0 right-5'>Privacy Policy</h1>
+                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 left-3 lg:left-5 text-center lg:text-left'>Copyright 2025 @ PostVault LTD.</h1>
+                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 right-3 lg:right-5 text-center lg:text-right'>Privacy Policy</h1>
             </div>
         </div>
     )
-}
+};

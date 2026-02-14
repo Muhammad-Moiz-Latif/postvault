@@ -1,8 +1,8 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import { AllPosts } from "../apis/AllPosts";
 
-export function useAllPosts() {
-    return useInfiniteQuery({
+export function allPostsQueryOptions() {
+    return infiniteQueryOptions({
         queryKey: ['all-posts'],
         queryFn: AllPosts,
         initialPageParam: undefined, //the first request which will have no cursor
@@ -11,4 +11,9 @@ export function useAllPosts() {
         },
         staleTime: 2 * 60 * 1000
     })
+}
+
+
+export function useAllPosts() {
+    return useInfiniteQuery(allPostsQueryOptions());
 };

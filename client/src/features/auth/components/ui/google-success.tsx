@@ -5,7 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 
 export const GoogleSuccess = () => {
     const [searchParams] = useSearchParams();
-    const { setAuth, auth } = useAuth();
+    const { setAuth } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {

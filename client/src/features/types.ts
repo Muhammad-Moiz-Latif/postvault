@@ -144,3 +144,38 @@ export type MyPostsResponse = ApiResponse<[{
     likedbyme: boolean,
     savedbyme: boolean
 }]>;
+
+export type MyProfileResponse = ApiResponse<{
+    id: string,
+    username: string,
+    email: string,
+    img: string,
+    createdAt: string,
+    liked_posts: {
+        id: string;
+        title: string;
+        paragraph: string;
+        img: string;
+        likedAt: string;
+    }[];
+
+    liked_comments: {
+        id: string;
+        text: string;
+        likedAt: string;
+    }[];
+
+    saved_posts: {
+        id: string;
+        img: string;
+        paragraph: string;
+        title: string;
+        publishedAt: string;
+        author: {
+            id: string;
+            username: string;
+            img: string;
+        };
+    }[];
+
+}>;

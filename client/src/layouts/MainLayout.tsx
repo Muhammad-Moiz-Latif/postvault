@@ -9,15 +9,10 @@ export const MainLayout = () => {
         <div className="min-h-screen w-full">
             <SideBar isOpen={isOpen} setIsOpen={setIsOpen} />
             <Navbar isOpen={isOpen} />
-            <main className={`pt-16 z-0 ${isOpen ? "pl-52" : "pl-20"} transition-all ease-in-out`}>
+            <main className={`pt-16 z-0 ${isOpen ? "pl-60" : "pl-16"} transition-all ease-in-out`}>
+
                 <Outlet />
             </main>
-            {/* <div className="flex-1 flex flex-col">
-                <Navbar />
-                <main className="flex-1 overflow-y-auto overflow-x-hidden">
-                    <Outlet />
-                </main>
-            </div> */}
         </div>
     );
 };

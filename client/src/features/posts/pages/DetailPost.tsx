@@ -1,199 +1,315 @@
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import { useDetailedPost } from "../queries/useDetailedPost"
 import { useReactToPost } from "../queries/useReactToPost";
 import { useState } from "react";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Heart, MessageCircle, Share2, MoreHorizontal, Loader2, ArrowLeft } from "lucide-react";
 import { useComment } from "../queries/useComment";
 import { useQueryClient } from "@tanstack/react-query";
 import { ToastContainer, toast } from "react-toastify";
 import { Comment } from "../components/Comment";
-import { useAuth } from "../../../context/authContext";
-import { useDeletePost } from "../queries/useDeletePost";
 import { useSavePost } from "../queries/useSavePost";
+import { useNavigate } from "react-router";
 
 export const DetailPost = () => {
     const { postId } = useParams();
-    const { auth } = useAuth();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { data, isSuccess, isPending } = useDetailedPost(postId || "");
-    const [isComment, setComment] = useState("");
+    const [commentText, setCommentText] = useState("");
     const { mutate: CommentOnPost, isPending: loadingComment } = useComment();
     const { mutate: ReactToPost } = useReactToPost(postId!);
-    const { mutate: DeletePost, isPending: isDeleting } = useDeletePost();
     const { mutate: SavePost } = useSavePost(postId!);
-    const navigate = useNavigate();
     const post = data?.data!;
 
+    // Calculate reading time
+    const calculateReadingTime = (text: string) => {
+        const words = text.trim().split(/\s+/).length;
+        const minutes = Math.ceil(words / 200);
+        return `${minutes} min read`;
+    };
+
+    // Format date
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        });
+    };
 
     function handleLike() {
         ReactToPost();
-    };
+    }
 
     function handleSave() {
         SavePost();
-    };
+    }
 
     function handleComment() {
-        CommentOnPost({ postId, comment: isComment }, {
+        if (!commentText.trim()) return;
+
+        CommentOnPost({ postId, comment: commentText }, {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['post', postId] });
                 queryClient.invalidateQueries({ queryKey: ['all-posts'] });
-                setComment("");
+                setCommentText("");
+                toast.success("Response published");
             },
             onError: (error) => {
                 console.error(error);
-                toast.error("An error occured while commenting on this post");
+                toast.error("Failed to publish response");
             }
-        })
-    };
-
-    async function deletePost() {
-        DeletePost(postId, {
-            onSuccess: () => {
-                toast.success("Deleted Post Successfully!");
-                queryClient.invalidateQueries({ queryKey: ['all-posts'] });
-                setTimeout(() => {
-                    navigate("/app", { replace: true });
-                }, 1500);
-            },
-            onError: (error) => {
-                console.error(error);
-                toast.error("Unable to delete post");
-            }
-        })
-    };
-
-
+        });
+    }
 
     if (isPending) {
         return (
-            <div className="w-full min-h-screen flex items-center justify-center">
-                <div className="text-lg text-gray-500">Loading...</div>
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Loading post...</p>
+                </div>
             </div>
         );
     }
 
     if (!isSuccess || !post) {
         return (
-            <div className="w-full min-h-screen flex items-center justify-center">
-                <div className="text-lg text-gray-500">Post not found</div>
+            <div className="min-h-screen flex items-center justify-center px-4">
+                <div className="text-center max-w-md">
+                    <h2 className="text-xl font-semibold text-foreground mb-2">
+                        Post not found
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-4">
+                        This post may have been deleted or made private.
+                    </p>
+                    <button
+                        onClick={() => navigate('/app')}
+                        className="px-4 py-2 bg-foreground text-background rounded-lg text-sm font-medium hover:bg-foreground/90 transition-colors"
+                    >
+                        Back to feed
+                    </button>
+                </div>
             </div>
         );
-    };
-
+    }
 
     return (
-        <article className="w-full min-h-screen bg-white">
+        <article className="min-h-screen bg-background">
+            <ToastContainer position="top-center" hideProgressBar />
 
-            <ToastContainer
-                position='top-center'
-                closeOnClick
-                draggable
-                hideProgressBar={true}
-            />
+            {/* Back button */}
+            <div className="border-b border-border">
+                <div className="max-w-3xl mx-auto px-4 py-4">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <ArrowLeft size={16} />
+                        <span>Back</span>
+                    </button>
+                </div>
+            </div>
 
-            <div className="max-w-[680px] mx-auto px-6 py-12">
+            <div className="max-w-3xl mx-auto px-4 py-12">
+
+                {/* Draft badge */}
+                {post.status === "DRAFT" && (
+                    <div className="mb-6">
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-sm font-medium border border-amber-200">
+                            <span className="size-1.5 rounded-full bg-amber-500" />
+                            Draft
+                        </span>
+                    </div>
+                )}
+
                 {/* Title */}
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6 leading-tight">
+                <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
                     {post.title}
                 </h1>
 
-                {/* Author info */}
-                <div className="flex items-center justify-between gap-3 mb-8 pb-8 border-b border-gray-200">
-                    <div className="flex gap-3">
+                {/* Author + Meta */}
+                <div className="flex items-center justify-between mb-8 pb-8 border-b border-border">
+                    <div className="flex items-center gap-3">
                         <img
                             src={post.author.img}
                             alt={post.author.username}
-                            className="w-12 h-12 rounded-full object-cover"
+                            className="size-12 rounded-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => navigate(`/app/profile/${post.author.id}`)}
                         />
                         <div className="flex flex-col">
-                            <span className="font-medium text-gray-900">{post.author.username}</span>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <time>{post.createdAt}</time>
+                            <button
+                                onClick={() => navigate(`/app/profile/${post.author.id}`)}
+                                className="font-medium text-foreground hover:underline text-left"
+                            >
+                                {post.author.username}
+                            </button>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <time>{formatDate(post.createdAt)}</time>
+                                <span>·</span>
+                                <span>{calculateReadingTime(post.paragraph)}</span>
                             </div>
-                            <Bookmark
-                                onClick={handleSave}
-                                className={`hover:cursor-pointer ${post.savedbyme ? "text-rose-600 " : "text-zinc-400"} `}
-                            />
-
                         </div>
-
                     </div>
 
-                    {
-                        (auth.user_id === post.author.id) &&
+                    {/* Actions */}
+                    <div className="flex items-center gap-1">
                         <button
-                            disabled={isDeleting}
-                            onClick={deletePost}
-                            className="bg-rose-600 text-white rounded-md px-3 py-1 hover:cursor-pointer
-                            active:opacity-50"
+                            onClick={handleSave}
+                            className="p-2 rounded-full hover:bg-muted transition-colors"
+                            aria-label="Save post"
                         >
-                            {isDeleting ? "Deleting..." : "Delete Post"}
+                            <Bookmark
+                                size={20}
+                                className={`transition-colors ${post.savedbyme
+                                        ? "fill-foreground text-foreground"
+                                        : "text-muted-foreground"
+                                    }`}
+                                strokeWidth={1.5}
+                            />
                         </button>
-                    }
+                        <button
+                            className="p-2 rounded-full hover:bg-muted transition-colors"
+                            aria-label="Share post"
+                        >
+                            <Share2 size={20} className="text-muted-foreground" strokeWidth={1.5} />
+                        </button>
+                        <button
+                            className="p-2 rounded-full hover:bg-muted transition-colors"
+                            aria-label="More options"
+                        >
+                            <MoreHorizontal size={20} className="text-muted-foreground" strokeWidth={1.5} />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Main content */}
-                <div className="prose prose-lg max-w-none">
-                    <p className="text-xl leading-relaxed text-gray-800 whitespace-pre-wrap">
+                {/* Hero Image */}
+                {post.img && (
+                    <div className="mb-12 -mx-4 md:mx-0">
+                        <img
+                            src={post.img}
+                            alt={post.title}
+                            className="w-full rounded-lg object-cover max-h-[500px]"
+                        />
+                    </div>
+                )}
+
+                {/* Tags */}
+                {post.tags?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-8">
+                        {post.tags.map(tag => (
+                            <button
+                                key={tag}
+                                onClick={() => navigate(`/app/tag/${tag}`)}
+                                className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-sm hover:bg-muted/80 transition-colors"
+                            >
+                                {tag}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Body */}
+                <div className="prose prose-lg max-w-none mb-12">
+                    <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap">
                         {post.paragraph}
                     </p>
                 </div>
 
-                {/* Engagement bar */}
-                <div className="flex items-center gap-6 py-6 my-8 border-y border-gray-200">
-                    <button
-                        onClick={handleLike}
-                        className={`flex items-center hover:cursor-pointer
-                        gap-2 ${post.likedbyme ? "text-rose-600" : "text-gray-600"}  hover:text-gray-900 transition`}>
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        <span className="text-sm">{post.likes}</span>
-                    </button>
-                    <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                        <span className="text-sm">{post.comments.length}</span>
-                    </button>
+                {/* Engagement Bar */}
+                <div className="flex items-center justify-between py-6 border-y border-border">
+                    <div className="flex items-center gap-6">
+                        <button
+                            onClick={handleLike}
+                            className="flex items-center gap-2 group"
+                        >
+                            <div className={`p-2 rounded-full transition-colors ${post.likedbyme
+                                    ? "bg-rose-50"
+                                    : "hover:bg-muted"
+                                }`}>
+                                <Heart
+                                    size={20}
+                                    className={`transition-colors ${post.likedbyme
+                                            ? "fill-rose-500 text-rose-500"
+                                            : "text-muted-foreground group-hover:text-foreground"
+                                        }`}
+                                    strokeWidth={1.5}
+                                />
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                                {post.likes}
+                            </span>
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 rounded-full">
+                                <MessageCircle
+                                    size={20}
+                                    className="text-muted-foreground"
+                                    strokeWidth={1.5}
+                                />
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                                {post.comments.length}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Comments section */}
-                <div className="mt-12">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-8">
-                        Comments ({post.comments.length})
+                {/* Comments Section */}
+                <section className="mt-16">
+                    <h2 className="text-2xl font-bold text-foreground mb-8">
+                        Responses ({post.comments.length})
                     </h2>
 
-                    {/* Comment input */}
-                    <div className="mb-10">
+                    {/* Comment Input */}
+                    <div className="mb-12">
                         <textarea
-                            placeholder="What are your thoughts?"
-                            value={isComment}
-                            onChange={(e) => setComment(e.target.value)}
-                            className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:border-gray-900 transition"
-                            rows={3}
+                            placeholder="Share your thoughts..."
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            rows={4}
+                            className="w-full p-4 rounded-lg border border-border bg-background text-foreground resize-none outline-none focus:ring-2 focus:ring-ring transition-shadow text-sm"
                         />
                         <div className="flex justify-end mt-3">
                             <button
-                                disabled={loadingComment}
+                                disabled={loadingComment || !commentText.trim()}
                                 onClick={handleComment}
-                                className="px-6 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 transition">
-                                {loadingComment ? "Responding..." : "Respond"}
+                                className="px-5 py-2 rounded-lg bg-foreground text-background text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                {loadingComment ? (
+                                    <span className="flex items-center gap-2">
+                                        <Loader2 size={14} className="animate-spin" />
+                                        Publishing...
+                                    </span>
+                                ) : "Respond"}
                             </button>
                         </div>
                     </div>
 
-                    {/* Comments list */}
-                    <div className="space-y-8">
-                        {post.comments.map(comment => (
-                            <Comment comment={comment} isReply={false} postId={postId!} key={comment.id} />
-                        ))}
-                    </div>
-                </div>
+                    {/* Comments List */}
+                    {post.comments.length > 0 ? (
+                        <div className="space-y-8">
+                            {post.comments.map(comment => (
+                                <Comment
+                                    key={comment.id}
+                                    comment={comment}
+                                    depth={0}
+                                    postId={postId!}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12">
+                            <MessageCircle size={40} className="mx-auto mb-3 text-muted-foreground opacity-50" />
+                            <p className="text-muted-foreground text-sm">
+                                No responses yet. Be the first to share your thoughts.
+                            </p>
+                        </div>
+                    )}
+                </section>
             </div>
         </article>
     );
 };
-
-
