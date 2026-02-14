@@ -82,19 +82,19 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                 <VerifyEmail tokenId={verificationTokenId} setVerifyModal={setShowVerifyModal} setIsLogin={setLogin} />
             </div>}
 
-            <div className='hidden lg:block w-full h-full rounded-2xl border border-primary/40 relative'>
+            <div className='hidden lg:block w-full h-full rounded-2xl border border-primary/40 relative animate-slide-left'>
                 <img src={bg} className='size-full rounded-2xl' />
                 <h1 className='absolute bottom-10 left-3 font-serif text-3xl lg:text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
                 <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-sm lg:text-lg'>Write without distraction. Share with intention.</p>
             </div>
-            <div className='w-full h-full flex flex-col justify-start pt-8 lg:pt-15 items-center relative overflow-y-auto lg:overflow-visible'>
-                <img src={logo} className='size-16 lg:size-24 object-contain absolute -top-5 left-5' />
-                <div className='mb-4 text-center px-4'>
+            <div className='w-full h-full flex flex-col justify-start pt-8 lg:pt-15 items-center relative overflow-y-auto lg:overflow-visible animate-slide-down'>
+                <img src={logo} className='size-16 lg:size-24 object-contain absolute -top-5 left-5 animate-slide-down' style={{ animationDelay: '0.1s' }} />
+                <div className='mb-4 text-center px-4 animate-slide-down' style={{ animationDelay: '0.2s' }}>
                     <h1 className='text-center tracking-tight text-lg lg:text-2xl font-sans text-foreground'>Create an account to write and publish</h1>
                     <p className='text-xs lg:text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign up.</p>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-xs lg:max-w-md px-4 lg:px-0">
+                <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-xs lg:max-w-md px-4 lg:px-0 animate-slide-down" style={{ animationDelay: '0.3s' }}>
                     <div className="flex justify-center items-center bg-muted mx-4 lg:mx-20 p-0.75 rounded-[4px] mb-4">
                         <button
                             type='button'
@@ -224,8 +224,8 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                         <img src={google} className='size-8 lg:size-10 mt-0.5' />
                     </div>
                 </form>
-                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 left-3 lg:left-5 text-center lg:text-left'>Copyright 2025 @ PostVault LTD.</h1>
-                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 right-3 lg:right-5 text-center lg:text-right'>Privacy Policy</h1>
+                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 left-3 lg:left-5 text-center lg:text-left animate-slide-up' style={{ animationDelay: '0.5s' }}>Copyright 2025 @ PostVault LTD.</h1>
+                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 right-3 lg:right-5 text-center lg:text-right animate-slide-up' style={{ animationDelay: '0.5s' }}>Privacy Policy</h1>
             </div>
         </div>
     )
