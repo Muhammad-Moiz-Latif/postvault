@@ -71,4 +71,137 @@ export const userController = {
             });
         };
     },
+
+    async getSavedPosts(req: Request, res: Response) {
+        try {
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Unauthorized User"
+                });
+            };
+
+            const savedPosts = await userService.SavedPosts(userId);
+
+            if (savedPosts) {
+                return res.status(200).json({
+                    success: true,
+                    message: "Retrieved saved posts successfully",
+                    data: savedPosts
+                })
+            };
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        };
+    },
+
+    async FollowUser(req: Request, res: Response) {
+        try {
+            const { followingId } = req.body;
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Unauthorized User"
+                });
+            };
+
+            const following = await userService.isFollowing(userId);
+
+            if (following && following.createdAt) {
+                //un-follow the cunt
+                const unfollowed = await userService.UnFollowedUser(userId, followingId);
+                if (unfollowed) {
+                    return res.status(200).json({
+                        success: true,
+                        action: "Unfollowed",
+                        message: "Account has been unfollowed"
+                    });
+                };
+            } else {
+                // follow the cunt
+                const followed = await userService.FollowUser(userId, followingId);
+                if (followed) {
+                    return res.status(200).json({
+                        success: true,
+                        action: "Followed",
+                        message: "Started following account"
+                    });
+                };
+            };
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        }
+    },
+
+    async getFollowers(req: Request, res: Response) {
+        try {
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Unauthorized User"
+                });
+            };
+
+            const myFollowers = await userService.getFollowers(userId);
+
+            if (myFollowers) {
+                return res.status(200).json({
+                    status: true,
+                    message: "Retrieved all of your followers",
+                    data: myFollowers
+                });
+            };
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        }
+    },
+
+    async MyFollowings(req: Request, res: Response) {
+        try {
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Unauthorized User"
+                });
+            };
+
+            const followings = await userService.myFollowings(userId);
+
+            if (followings) {
+                return res.status(200).json({
+                    status: true,
+                    message: "Retreived accounts you follow successfully",
+                    data: followings
+                });
+            };
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error"
+            });
+        }
+    },
 }

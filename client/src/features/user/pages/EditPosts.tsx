@@ -8,7 +8,7 @@ import { useDetailedPost } from "../../posts/queries/useDetailedPost";
 import { useEditPost } from "../queries/useEditPost";
 
 const PostSchema = z.object({
-    title: z.string().min(10, "Title must be at least 10 characters").max(30, "Title cannot be longer than 30 characters"),
+    title: z.string().min(10, "Title must be at least 10 characters").max(60, "Title cannot be longer than 60 characters"),
     paragraph: z.string().min(20, "Paragraph must be at least 20 characters"),
     image: z.instanceof(FileList)
         .refine(files => files.length === 0 || files[0].size < 10_000_000, "Image must be less than 10MB")
@@ -86,112 +86,157 @@ export const EditPost = () => {
     };
 
     return (
-        <div className="font-sans p-3 overflow-x-hidden relative">
+        <div className="font-sans p-6 overflow-x-hidden relative">
             <ToastContainer
                 position='top-center'
                 closeOnClick
                 draggable
                 hideProgressBar={true}
             />
-            <h1 className="text-3xl tracking-tight">Edit your post</h1>
-            {errorMessage && <h1 className="text-destructive font-sans text-sm tracking-tight my-1 text-center">{errorMessage}</h1>}
-            <form className="w-full max-w-xl flex flex-col"
-                onSubmit={handleSubmit(onSubmit)}
+            <div className="max-w-5xl mx-auto">
+                <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-2">Edit your story</h1>
+                {errorMessage && <div className="text-destructive font-sans text-sm mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20">{errorMessage}</div>}
+                <form className="w-full flex flex-col space-y-10"
+                    onSubmit={handleSubmit(onSubmit)}
 
-            >
-
-                {/* ENTER TITLE */}
-                <input
-                    type="text"
-                    {...register("title")}
-                    className="w-full h-9 rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
-                    placeholder="Enter a title"
-                />
-                {errors.title && <h1 className="text-red-500 mb-2 mt-0.5 text-xs tracking-tight">{errors.title.message}</h1>}
-
-                {/* ENTER PARAGRAPH */}
-                <textarea
-                    rows={5}
-                    {...register("paragraph")}
-                    className="w-full rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
-                    placeholder="Enter your paragraph"
-                />
-                {errors.paragraph && <h1 className="text-red-500 mb-2 mt-0.5 text-xs tracking-tight">{errors.paragraph.message}</h1>}
-
-                {/* SELECT IMAGE */}
-                <div className="flex mb-1.5">
-                    <label htmlFor="profile-picture" className="cursor-pointer">
-                        <div className="w-96 h-40 rounded-md bg-muted flex items-center justify-center border-2 border-border hover:border-primary transition-all">
-                            {previewUrl ? (
-                                <img src={previewUrl} alt="Profile preview" className="w-full h-full object-cover rounded-md" />
-                            ) : (
-                                <div className="text-xl">📷</div>
-                            )}
-                        </div>
-                        <input
-                            {...register("image")}
-                            id="profile-picture"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                        />
-                    </label>
-                </div>
-                {errors.image && <p className="text-destructive text-xs text-center mb-2 mt-0.5 font-sans">{errors.image.message}</p>}
-
-                {/* SELECT TAGS */}
-                <input
-                    type="text"
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault();
-
-                            const value = e.currentTarget.value.trim();
-                            if (!value) return;
-                            if (fields.length >= 5) return;
-
-                            append({ value });
-                            e.currentTarget.value = "";
-                        }
-                    }}
-                    className="w-full rounded-md outline-none p-2 text-sm tracking-tight border border-border mb-2"
-                    placeholder="Press Enter to add tags"
-                />
-
-                <div className="flex flex-wrap gap-2 mb-2">
-                    {fields.map((field, index) => (
-                        <div
-                            key={field.id}
-                            className="bg-muted px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                        >
-                            {field.value}
-                            <button
-                                type="button"
-                                onClick={() => remove(index)}
-                                className="text-red-500 hover:text-red-700"
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ))}
-                </div>
-
-                {errors.tags && (
-                    <p className="text-destructive text-xs mb-2">
-                        {errors.tags.message}
-                    </p>
-                )}
-
-                {/* SUBMIT BUTTON */}
-                <button
-                    type="submit"
-                    disabled={isPending || !post}
-                    className="bg-primary text-primary-foreground hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50 font-sans text-sm font-medium hover:bg-primary/90 transition"
                 >
-                    {!post ? "Loading..." : isPending ? (post.status === "PUBLISHED" ? "Editing.." : "Publishing...") : (post.status === "PUBLISHED" ? "Edit Post" : "Publish Post")}
-                </button>
-            </form>
+
+                    {/* SECTION: POST DETAILS */}
+                    <div className="space-y-6">
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans">
+                            Post Details
+                        </p>
+
+                        {/* ENTER TITLE */}
+                        <div className="space-y-2">
+                            <input
+                                type="text"
+                                {...register("title")}
+                                className="w-full text-2xl md:text-3xl font-serif font-bold bg-card border border-border/60 px-5 py-4 rounded-xl outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all hover:border-border/80"
+                                placeholder="Title"
+                            />
+                            {errors.title && <p className="text-destructive text-xs font-sans">{errors.title.message}</p>}
+                        </div>
+
+                        {/* ENTER PARAGRAPH */}
+                        <div className="space-y-2">
+                            <textarea
+                                rows={14}
+                                {...register("paragraph")}
+                                className="w-full text-lg leading-relaxed bg-card border border-border/60 px-5 py-5 rounded-xl outline-none resize-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all font-sans hover:border-border/80"
+                                placeholder="Tell your story..."
+                            />
+                            {errors.paragraph && <p className="text-destructive text-xs font-sans">{errors.paragraph.message}</p>}
+                        </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+
+                    {/* SECTION: COVER IMAGE */}
+                    <div className="space-y-4">
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans">
+                            Cover Image
+                        </p>
+
+                        <label
+                            htmlFor="profile-picture"
+                            className="group block border-2 border-dashed border-border/60 rounded-2xl hover:border-primary/40 transition-all cursor-pointer overflow-hidden"
+                        >
+                            <div className="h-72 flex items-center justify-center bg-card group-hover:bg-card/80 transition-colors">
+                                {previewUrl ? (
+                                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+                                ) : (
+                                    <div className="text-center text-muted-foreground px-6">
+                                        <p className="text-sm font-medium font-sans">
+                                            Click to upload cover image
+                                        </p>
+                                        <p className="text-xs mt-2 font-sans">
+                                            PNG, JPG, GIF, WEBP up to 10MB
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <input
+                                {...register("image")}
+                                id="profile-picture"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                            />
+                        </label>
+
+                        {errors.image && <p className="text-destructive text-xs font-sans">{errors.image.message}</p>}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+
+                    {/* SECTION: TAGS */}
+                    <div className="space-y-6">
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans">
+                            Categorization
+                        </p>
+
+                        <input
+                            type="text"
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+
+                                    const value = e.currentTarget.value.trim();
+                                    if (!value) return;
+                                    if (fields.length >= 5) return;
+
+                                    append({ value });
+                                    e.currentTarget.value = "";
+                                }
+                            }}
+                            className="w-full px-5 py-4 border border-border/60 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 bg-card transition-all font-sans hover:border-border/80"
+                            placeholder="Type a tag and press Enter"
+                        />
+
+                        {fields.length > 0 && (
+                            <div className="flex flex-wrap gap-3">
+                                {fields.map((field, index) => (
+                                    <div
+                                        key={field.id}
+                                        className="flex items-center gap-2 px-3.5 py-2 bg-accent text-foreground rounded-full text-sm font-sans ring-1 ring-primary/20"
+                                    >
+                                        <span>{field.value}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => remove(index)}
+                                            className="text-muted-foreground hover:text-destructive transition-colors"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {errors.tags && (
+                            <p className="text-destructive text-xs font-sans">
+                                {errors.tags.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* SUBMIT BUTTON */}
+                    <div className="flex gap-3 pt-6">
+                        <button
+                            type="submit"
+                            disabled={isPending || !post}
+                            className="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-background rounded-full text-sm font-semibold font-sans hover:shadow-lg disabled:opacity-50 transition-all"
+                        >
+                            {!post ? "Loading..." : isPending ? (post.status === "PUBLISHED" ? "Saving..." : "Publishing...") : (post.status === "PUBLISHED" ? "Save Changes" : "Publish Story")}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    )
+    );
 };
 

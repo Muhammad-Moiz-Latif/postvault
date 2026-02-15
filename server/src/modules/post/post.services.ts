@@ -264,6 +264,11 @@ export const postService = {
                     AND sp."userId" = ${authorId}
                 ) AS savedByMe,
 
+                EXISTS (
+                    SELECT 1 from follows f
+                    WHERE f."followerId" = ${authorId}
+                ) AS followedbyme,
+
                 COALESCE(
                     (
                     SELECT json_agg(

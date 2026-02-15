@@ -12,6 +12,9 @@ import { DetailPost } from "./features/posts/pages/DetailPost";
 import MyPosts from "./features/user/pages/MyPosts";
 import { EditPost } from "./features/user/pages/EditPosts";
 import { MyProfile } from "./features/user/pages/MyProfile";
+import { TagPage } from "./features/user/pages/TagPage";
+import PublishedPosts from "./features/user/pages/Published";
+import DraftPosts from "./features/user/pages/Drafts";
 
 
 export const router = createBrowserRouter(
@@ -56,6 +59,10 @@ export const router = createBrowserRouter(
                                     element: <Home />,
                                 },
                                 {
+                                    path: "tag/:tag",
+                                    element: <TagPage />
+                                },
+                                {
                                     path: ":postId",
                                     element: <DetailPost />
                                 },
@@ -66,6 +73,14 @@ export const router = createBrowserRouter(
                                 {
                                     path: "posts",
                                     element: <MyPosts />,
+                                },
+                                {
+                                    path: 'posts/published',
+                                    element: <PublishedPosts />
+                                },
+                                {
+                                    path: 'posts/drafts',
+                                    element: <DraftPosts />
                                 },
                                 {
                                     path: "posts/edit/:postId",

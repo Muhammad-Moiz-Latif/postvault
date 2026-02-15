@@ -43,6 +43,7 @@ export function useReactToPost(postId: string) {
 
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["post", postId] });
+            queryClient.invalidateQueries({ queryKey: ['all-posts'] });
         },
     });
 }

@@ -11,10 +11,11 @@ export function Navbar({ isOpen }: { isOpen: boolean }) {
         <header
             className={`
                 fixed top-0 z-30
-                bg-background border-b border-border
+                bg-gradient-to-b from-background via-background to-background/95
+                border-b border-border/50 backdrop-blur-sm
                 flex items-center justify-between
                 px-6 transition-all duration-300 ease-out
-                ${isOpen ? "ml-60 w-[calc(100%-15rem)] h-[63px]" : "ml-16  h-16 w-[calc(100%-4rem)]"}
+                ${isOpen ? "ml-60 w-[calc(100%-15rem)] h-[63px]" : "ml-16 h-16 w-[calc(100%-4rem)]"}
             `}
         >
             {/* Search Section */}
@@ -22,69 +23,72 @@ export function Navbar({ isOpen }: { isOpen: boolean }) {
                 <Search className="absolute left-3 size-4 text-muted-foreground pointer-events-none" />
                 <input
                     type="search"
-                    placeholder="Search posts..."
+                    placeholder="Search for stories..."
                     className="
                         w-full h-9 pl-9 pr-3
-                        rounded-lg border border-border
-                        bg-background text-foreground text-sm
+                        rounded-full border border-border/60
+                        bg-card text-foreground text-sm font-sans
                         outline-none transition-all
-                        placeholder:text-muted-foreground
-                        focus:ring-2 focus:ring-ring focus:border-transparent
+                        placeholder:text-muted-foreground/70
+                        focus:ring-2 focus:ring-primary/30 focus:border-primary/50
+                        hover:border-border/80
                     "
                 />
             </div>
 
             {/* Right Section - Notifications & Profile */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
                 {/* Notification Button */}
                 <button
                     className="
-                        relative p-2 rounded-lg
+                        relative p-2.5 rounded-full
                         text-muted-foreground
-                        hover:text-foreground hover:bg-muted
-                        transition-colors
+                        hover:text-foreground hover:bg-accent/50
+                        transition-all duration-200
+                        group
                     "
                     aria-label="Notifications"
                 >
-                    <BellIcon size={18} strokeWidth={1.5} />
-                    <span className="absolute top-1.5 right-1.5 size-1.5 bg-destructive rounded-full" />
+                    <BellIcon size={18} strokeWidth={1.5} className="group-hover:scale-110 transition-transform" />
+                    <span className="absolute top-2 right-2 size-1.5 bg-primary rounded-full animate-pulse" />
                 </button>
 
                 {/* Divider */}
-                <div className="w-px h-5 bg-border mx-1" />
+                <div className="w-px h-6 bg-border/40" />
 
                 {/* Profile Section */}
                 {isLoading ? (
-                    <div className="flex items-center gap-2 px-2 py-1.5">
-                        <div className="size-7 rounded-full bg-muted animate-pulse" />
-                        <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+                    <div className="flex items-center gap-2.5 px-3 py-2">
+                        <div className="size-8 rounded-full bg-accent animate-pulse" />
+                        <div className="h-3.5 w-24 bg-accent rounded-full animate-pulse hidden sm:block" />
                     </div>
                 ) : error ? (
-                    <div className="flex items-center gap-2 px-2 py-1.5">
-                        <div className="size-7 rounded-full bg-muted flex items-center justify-center">
+                    <div className="flex items-center gap-2.5 px-3 py-2">
+                        <div className="size-8 rounded-full bg-accent flex items-center justify-center">
                             <User size={14} className="text-muted-foreground" />
                         </div>
-                        <span className="text-sm text-muted-foreground">Unavailable</span>
+                        <span className="text-sm text-muted-foreground font-sans hidden sm:block">Profile</span>
                     </div>
                 ) : (
                     <button
                         className="
-                            flex items-center gap-2
-                            px-2 py-1.5 rounded-lg
-                            hover:bg-muted
-                            transition-colors
+                            flex items-center gap-2.5
+                            px-3 py-2 rounded-full
+                            hover:bg-accent/40
+                            transition-all duration-200
+                            group
                         "
                         aria-label="Account menu"
                     >
                         <img
                             src={profile?.img || ""}
                             alt={profile?.username}
-                            className="size-7 rounded-full object-cover"
+                            className="size-8 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
                         />
-                        <span className="text-sm font-medium text-foreground">
+                        <span className="text-sm font-medium text-foreground hidden sm:block font-sans">
                             {profile?.username}
                         </span>
-                        <ChevronDown size={16} className="text-muted-foreground" strokeWidth={1.5} />
+                        <ChevronDown size={16} className="text-muted-foreground group-hover:text-primary transition-colors hidden sm:block" strokeWidth={1.5} />
                     </button>
                 )}
             </div>

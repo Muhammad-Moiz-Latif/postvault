@@ -107,6 +107,7 @@ export type DetailedPostResponse = ApiResponse<{
     status: "DRAFT" | "PUBLISHED",
     likedbyme: boolean,
     savedbyme: boolean,
+    followedbyme: boolean,
     comments: CommentsinDetailedPost[]
 }>;
 
@@ -158,6 +159,8 @@ export type MyProfileResponse = ApiResponse<{
         img: string;
         likedAt: string;
     }[];
+
+    followedbyme: boolean,
 
     liked_comments: {
         id: string;

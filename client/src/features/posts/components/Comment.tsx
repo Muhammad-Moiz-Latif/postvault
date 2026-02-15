@@ -116,23 +116,23 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
     }
 
     return (
-        <div className={depth > 0 ? "ml-12 pt-6 border-l-2 border-border pl-6" : ""}>
+        <div className={depth > 0 ? "ml-12 pt-6 border-l-2 border-border/50 pl-6" : ""}>
             <div className="flex gap-3">
                 {/* Avatar */}
                 <img
                     src={comment.author.img}
                     alt={comment.author.username}
-                    className="size-10 rounded-full object-cover flex-shrink-0"
+                    className="size-10 rounded-full object-cover flex-shrink-0 ring-2 ring-primary/20"
                 />
 
                 <div className="flex-1 min-w-0">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                            <span className="font-medium text-foreground text-sm">
+                            <span className="font-semibold text-foreground text-sm font-sans">
                                 {comment.author.username}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground font-sans">
                                 {formatDate(comment.createdAt)}
                             </span>
                         </div>
@@ -142,9 +142,9 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
                             <div className="relative">
                                 <button
                                     onClick={() => setShowActions(!showActions)}
-                                    className="p-1 rounded-full hover:bg-muted transition-colors"
+                                    className="p-1 rounded-full hover:bg-accent/50 transition-all group"
                                 >
-                                    <MoreVertical size={16} className="text-muted-foreground" />
+                                    <MoreVertical size={16} className="text-muted-foreground group-hover:text-foreground transition-colors" />
                                 </button>
 
                                 {showActions && (
@@ -153,13 +153,13 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
                                             className="fixed inset-0 z-10"
                                             onClick={() => setShowActions(false)}
                                         />
-                                        <div className="absolute right-0 top-8 z-20 w-32 bg-background border border-border rounded-lg shadow-lg overflow-hidden">
+                                        <div className="absolute right-0 top-8 z-20 w-32 bg-card border border-border/60 rounded-lg shadow-lg overflow-hidden">
                                             <button
                                                 onClick={() => {
                                                     setIsEdit(true);
                                                     setShowActions(false);
                                                 }}
-                                                className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors"
+                                                className="w-full px-4 py-2 text-left text-sm font-sans hover:bg-accent transition-colors"
                                             >
                                                 Edit
                                             </button>
@@ -168,7 +168,7 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
                                                     handleDeleteComment();
                                                     setShowActions(false);
                                                 }}
-                                                className="w-full px-4 py-2 text-left text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                                                className="w-full px-4 py-2 text-left text-sm font-sans text-destructive hover:bg-destructive/10 transition-colors"
                                             >
                                                 {deleting ? "Deleting..." : "Delete"}
                                             </button>
@@ -186,13 +186,13 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
                                 value={editValue}
                                 onChange={(e) => setEditValue(e.target.value)}
                                 rows={3}
-                                className="w-full p-3 border border-border rounded-lg bg-background text-foreground resize-none outline-none focus:ring-2 focus:ring-ring transition-shadow text-sm"
+                                className="w-full p-3 border border-border/60 rounded-lg bg-card text-foreground resize-none outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all text-sm font-sans"
                             />
                             <div className="flex gap-2 mt-2">
                                 <button
                                     onClick={handleEdit}
                                     disabled={editing || !editValue.trim()}
-                                    className="px-4 py-1.5 bg-foreground text-background text-sm rounded-lg font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-1.5 bg-gradient-to-r from-primary to-primary/90 text-background text-sm rounded-full font-semibold font-sans hover:shadow-lg disabled:opacity-50 transition-all"
                                 >
                                     {editing ? (
                                         <span className="flex items-center gap-2">
@@ -206,14 +206,14 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
                                         setIsEdit(false);
                                         setEditValue(comment.text);
                                     }}
-                                    className="px-4 py-1.5 text-sm rounded-lg hover:bg-muted transition-colors"
+                                    className="px-4 py-1.5 text-sm rounded-full font-sans font-medium hover:bg-accent/50 transition-all"
                                 >
                                     Cancel
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <p className="text-foreground text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+                        <p className="text-foreground text-sm leading-relaxed mb-3 whitespace-pre-wrap font-sans">
                             {comment.text}
                         </p>
                     )}
@@ -225,17 +225,19 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
                                 onClick={handleCommentLike}
                                 className="flex items-center gap-1.5 group"
                             >
-                                <Heart
-                                    size={16}
-                                    className={`transition-colors ${comment.likedByMe
+                                <div className={`p-1 rounded-full transition-all ${comment.likedByMe ? "bg-rose-100" : "group-hover:bg-accent/50"}`}>
+                                    <Heart
+                                        size={14}
+                                        className={`transition-colors ${comment.likedByMe
                                             ? "fill-rose-500 text-rose-500"
                                             : "text-muted-foreground group-hover:text-foreground"
-                                        }`}
-                                    strokeWidth={1.5}
-                                />
-                                <span className={`text-xs ${comment.likedByMe
-                                        ? "text-rose-500"
-                                        : "text-muted-foreground"
+                                            }`}
+                                        strokeWidth={1.5}
+                                    />
+                                </div>
+                                <span className={`text-xs font-sans font-medium ${comment.likedByMe
+                                    ? "text-rose-500"
+                                    : "text-muted-foreground"
                                     }`}>
                                     {comment.likes}
                                 </span>
@@ -244,7 +246,7 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
                             {canReply && (
                                 <button
                                     onClick={() => setIsReplying(!isReplying)}
-                                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                                    className="text-xs font-sans font-medium text-muted-foreground hover:text-foreground transition-colors"
                                 >
                                     {isReplying ? "Cancel" : "Reply"}
                                 </button>
@@ -260,13 +262,13 @@ export const Comment = ({ comment, depth, postId }: CommentProps) => {
                                 onChange={(e) => setReplyText(e.target.value)}
                                 placeholder="Write a reply..."
                                 rows={3}
-                                className="w-full p-3 border border-border rounded-lg bg-background text-foreground resize-none outline-none focus:ring-2 focus:ring-ring transition-shadow text-sm"
+                                className="w-full p-3 border border-border/60 rounded-lg bg-card text-foreground resize-none outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all text-sm font-sans"
                             />
                             <div className="flex justify-end gap-2 mt-2">
                                 <button
                                     disabled={replying || !replyText.trim()}
                                     onClick={handleReplySubmit}
-                                    className="px-4 py-1.5 bg-foreground text-background text-sm rounded-lg font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-1.5 bg-gradient-to-r from-primary to-primary/90 text-background text-sm rounded-full font-semibold font-sans hover:shadow-lg disabled:opacity-50 transition-all"
                                 >
                                     {replying ? (
                                         <span className="flex items-center gap-2">

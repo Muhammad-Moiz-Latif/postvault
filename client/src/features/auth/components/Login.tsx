@@ -11,7 +11,7 @@ import logo from '../../../assets/logo.png';
 import google from '../../../assets/google.png';
 import show from '../../../assets/show.png';
 import hide from '../../../assets/eye.png';
-import bg from '../../../assets/login_bg.jpg';
+import bg from '../../../assets/bg.jpg';
 
 const loginSchema = z.object({
     email: z.email("Please enter a valid email")

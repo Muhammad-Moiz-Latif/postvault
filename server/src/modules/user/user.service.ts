@@ -1,7 +1,8 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { UserTable } from '../../db/schema/users';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { PostTable } from '../../db/schema/posts';
+import { FollowUserTable } from '../../db/schema/follow.user';
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -81,6 +82,12 @@ export const userService = {
                     '[]'::json
                 ) AS liked_posts,
 
+                EXISTS (
+                   SELECT 1 FROM 
+                   follows f WHERE
+                   f."followerId" = ${userId}
+                ) AS followedbyme,
+
                 -- liked comments
                 COALESCE(
                     (
@@ -131,4 +138,96 @@ export const userService = {
 
         return result.rows[0] || null;
     },
+
+    async SavedPosts(userId: string) {
+        const posts = await db.execute(sql`
+        SELECT
+            p.id,
+            p.title,
+            p.paragraph,
+            p.img,
+            p.tags,
+            p."publishedAt",
+
+            json_build_object(
+                'id', sa.id,
+                'username', sa.username,
+                'img', sa.img
+            ) AS author,
+
+            EXISTS (
+                SELECT 1 FROM saved_posts sp
+                WHERE sp."userId" = ${userId} 
+                AND sp."postId" = p.id
+            ) AS "savedByMe",
+
+            (SELECT COUNT(*) FROM likepost lp 
+             WHERE lp."postId" = p.id
+            ) AS likes,
+
+            (SELECT COUNT(*) FROM comments c 
+             WHERE c."postId" = p.id
+            ) AS comments
+        
+        FROM saved_posts sp 
+        JOIN posts p ON sp."postId" = p.id 
+        JOIN users sa ON sa.id = p."authorId" 
+        WHERE sp."userId" = ${userId}
+    `);
+
+        return posts.rows;
+    },
+
+    async isFollowing(userId: string) {
+        const [following] = await db.select().from(FollowUserTable).where(eq(
+            FollowUserTable.followerId, userId
+        ));
+
+        return following;
+    },
+
+    async UnFollowedUser(userId: string, followingId: string) {
+        const [unfollowed] = await db.delete(FollowUserTable).where(and(
+            eq(FollowUserTable.followerId, userId),
+            eq(FollowUserTable.followingId, followingId)
+        )).returning();
+
+        return unfollowed;
+    },
+
+    async FollowUser(userId: string, followingId: string) {
+        const [followed] = await db.insert(FollowUserTable).values({
+            followerId: userId,
+            followingId
+        }).returning();
+
+        return followed;
+    },
+
+    async getFollowers(userId: string) {
+        const followers = await db.execute(sql`
+            SELECT
+                my.id,
+                my.img,
+                my.username,
+                my.email
+            FROM users my JOIN follows f ON
+            my.id = f."followerId" WHERE f."followingId" = ${userId}
+            `);
+        return followers.rows;
+    },
+
+    async myFollowings(userId: string) {
+        const followings = await db.execute(sql`
+                SELECT
+                    my.id,
+                    my.img,
+                    my.username,
+                    my.email
+                FROM users my JOIN follows f ON
+                    my.id = f."followingId" WHERE f."followerId" = ${userId}
+        `);
+
+        return followings.rows;
+    }
 }
