@@ -1,3 +1,5 @@
+import { number } from "zod";
+
 export type ApiResponse<T> = {
     success: boolean,
     message: string,
@@ -162,10 +164,40 @@ export type MyProfileResponse = ApiResponse<{
 
     followedbyme: boolean,
 
+    followers: {
+        id: string,
+        username: string,
+        img: string,
+        followedOn: string
+    }[],
+
+    followings: {
+        id: string,
+        username: string,
+        img: string,
+        followedOn: string
+    }[],
+
+    posts: {
+        id: string;
+        title: string;
+        paragraph: string;
+        img: string;
+        tags: string[],
+        publishedAt: string,
+        likes: number,
+        comments: number
+    }[],
+
     liked_comments: {
         id: string;
         text: string;
         likedAt: string;
+        author: {
+            id: string,
+            username: string,
+            img: string
+        }
     }[];
 
     saved_posts: {
@@ -182,3 +214,21 @@ export type MyProfileResponse = ApiResponse<{
     }[];
 
 }>;
+
+export type MySavedPostsResponse = ApiResponse<
+    {
+        id: string,
+        title: string,
+        paragraph: string,
+        img: string,
+        publishedAt: string,
+        tags: string[],
+        likes: number,
+        comments: number,
+        author: {
+            id: string,
+            username: string,
+            img: string
+        }
+    }[]
+>;

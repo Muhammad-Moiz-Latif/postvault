@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
 
 #root,
 :root {
@@ -248,5 +248,258 @@ body {
 
   .animate-slide-down {
     animation: slide-down 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+    opacity: .4
+  }
+
+  50% {
+    transform: translateY(-6px);
+    opacity: .8
+  }
+}
+
+@keyframes floatSlow {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+    opacity: .3
+  }
+
+  50% {
+    transform: translateY(-10px);
+    opacity: .6
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lineReveal {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-floatSlow {
+  animation: floatSlow 9s ease-in-out infinite;
+}
+
+.animate-fadeUp {
+  animation: fadeUp .9s ease forwards;
+}
+
+.animate-lineReveal {
+  animation: lineReveal 1.4s ease forwards .6s;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   EDITORIAL TOAST STYLES (Sonner)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Toast Container */
+[data-sonner-toaster] {
+  font-family: 'Source Sans 3', var(--font-sans), system-ui !important;
+}
+
+/* Base Toast Styling */
+[data-sonner-toast] {
+  background: linear-gradient(135deg,
+      hsl(var(--secondary) / 0.95) 0%,
+      hsl(var(--muted) / 0.95) 100%) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 1.5rem !important;
+  padding: 1rem 1.5rem !important;
+  box-shadow:
+    0 20px 40px -12px hsl(var(--primary) / 0.15),
+    0 0 0 1px hsl(var(--border)),
+    inset 0 1px 0 0 hsl(var(--background) / 0.2) !important;
+  backdrop-filter: blur(8px) !important;
+  color: hsl(var(--foreground)) !important;
+  font-size: 0.9375rem !important;
+  font-weight: 500 !important;
+  min-height: 68px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Success Toast */
+[data-sonner-toast][data-type="success"] {
+  background: linear-gradient(135deg,
+      hsl(var(--muted) / 0.95) 0%,
+      hsl(var(--primary) / 0.75) 100%) !important;
+  border-color: hsl(var(--primary) / 0.6) !important;
+  box-shadow:
+    0 20px 40px -12px hsl(var(--primary) / 0.25),
+    0 0 0 1px hsl(var(--primary) / 0.3),
+    inset 0 1px 0 0 hsl(var(--background) / 0.15) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--primary) !important;
+  filter: drop-shadow(0 2px 4px hsl(var(--primary) / 0.3));
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] svg {
+  fill: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-content] {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 500 !important;
+}
+
+/* Error Toast */
+[data-sonner-toast][data-type="error"] {
+  background: linear-gradient(135deg,
+      hsl(var(--muted) / 0.95) 0%,
+      hsl(var(--destructive) / 0.65) 100%) !important;
+  border-color: hsl(var(--destructive) / 0.6) !important;
+  box-shadow:
+    0 20px 40px -12px hsl(var(--destructive) / 0.25),
+    0 0 0 1px hsl(var(--destructive) / 0.3),
+    inset 0 1px 0 0 hsl(var(--background) / 0.15) !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: var(--destructive) !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] svg {
+  fill: var(--destructive) !important;
+  color: var(--destructive) !important;
+}
+
+/* Warning Toast */
+[data-sonner-toast][data-type="warning"] {
+  background: linear-gradient(135deg,
+      hsl(var(--muted) / 0.95) 0%,
+      hsl(45 100% 50% / 0.5) 100%) !important;
+  border-color: hsl(45 100% 50% / 0.6) !important;
+}
+
+/* Info Toast */
+[data-sonner-toast][data-type="info"] {
+  background: linear-gradient(135deg,
+      hsl(var(--muted) / 0.95) 0%,
+      hsl(var(--accent) / 0.5) 100%) !important;
+  border-color: hsl(var(--accent) / 0.6) !important;
+}
+
+/* Toast Content */
+[data-sonner-toast] [data-content] {
+  color: hsl(var(--foreground)) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.75rem !important;
+  flex: 1 !important;
+  text-align: center !important;
+}
+
+/* Toast Icon */
+[data-sonner-toast] [data-icon] {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  margin-right: 0.5rem !important;
+}
+
+/* Close Button - Hide completely */
+[data-sonner-toast] [data-close-button] {
+  display: none !important;
+}
+
+/* Loading Spinner - match primary color */
+[data-sonner-toast] [data-icon]>[data-loading-icon] {
+  color: var(--primary) !important;
+}
+
+/* Title (if using toast with title) */
+[data-sonner-toast] [data-title] {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  font-size: 0.9375rem;
+}
+
+/* Description */
+[data-sonner-toast] [data-description] {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Action Button */
+[data-sonner-toast] [data-button] {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: none !important;
+  padding: 0.375rem 0.75rem !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: opacity 0.2s !important;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  opacity: 0.9 !important;
+}
+
+/* Cancel Button */
+[data-sonner-toast] [data-cancel-button] {
+  background: hsl(var(--secondary)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Decorative Glow Effect */
+[data-sonner-toast]::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 1.5rem;
+  padding: 1px;
+  background: linear-gradient(135deg,
+      hsl(var(--primary) / 0.3),
+      transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  animation: borderGlow 0.6s ease forwards 0.2s;
+  pointer-events: none;
+}
+
+[data-sonner-toast][data-type="error"]::before {
+  background: linear-gradient(135deg,
+      hsl(var(--destructive) / 0.3),
+      transparent 60%);
+}
+
+@keyframes borderGlow {
+  to {
+    opacity: 1;
   }
 }

@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useReactToComment } from "../queries/useReactToComment";
 import { useReply } from "../queries/useReply";
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from 'sonner';
 import type { CommentsinDetailedPost } from "../../types";
 import { useAuth } from "../../../context/authContext";
 import { useDeleteComment } from "../queries/useDeleteComment";

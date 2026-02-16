@@ -4,11 +4,11 @@ import { useForm, type SubmitHandler, useFieldArray } from "react-hook-form";
 import z from "zod"
 import { useBlocker, useNavigate } from "react-router";
 import { useDraftPost } from "../queries/useDraftPost";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from 'sonner';
 import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { usePublishPost } from "../queries/usePublishPost";
-import { ArrowLeft, Loader2, X } from "lucide-react";
+import { ArrowLeft, Loader2, Tag, X } from "lucide-react";
 
 const PostSchema = z.object({
     title: z.string().min(10, "Title must be at least 10 characters").max(60, "Title cannot be longer than 60 characters"),
@@ -118,8 +118,6 @@ export const CreatePost = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <ToastContainer position="top-center" hideProgressBar />
-
             {/* Sticky Header */}
             <div className="border-b border-border/50 sticky top-0 bg-gradient-to-b from-background via-background to-background/95 backdrop-blur-sm z-20">
                 <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -248,8 +246,11 @@ export const CreatePost = () => {
                         </div>
 
                         {/* Divider */}
-                        <div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
-
+                        <div className="relative h-px bg-gradient-to-r from-transparent via-border to-transparent">
+                            <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 bg-background">
+                                <Tag className="text-muted-foreground" size={16} />
+                            </div>
+                        </div>
                         {/* SECTION: TAGS */}
                         <div className="space-y-6">
                             <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans">

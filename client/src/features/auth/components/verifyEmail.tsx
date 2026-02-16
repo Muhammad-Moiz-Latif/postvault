@@ -5,7 +5,7 @@ import {
     InputOTPSlot,
 } from "../components/ui/input-otp"
 import { useState } from "react";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { useEmailVerify } from "../queries/useEmailVerify";
 import { useNavigate } from "react-router";
 
@@ -42,7 +42,6 @@ export const VerifyEmail = ({ tokenId, setVerifyModal, setIsLogin }: { tokenId: 
 
     return (
         <div className="w-[40%] h-[50%] absolute border border-zinc-300 bg-white rounded-[10px] p-5 flex flex-col justify-evenly items-center">
-            <ToastContainer />
             <h1 className="tracking-tight text-3xl font-medium">OTP Verification</h1>
             <p className="text-sm tracking-tight">Enter the otp sent to your personal email</p>
             {errorMessage && <h1 className="text-red-600">{errorMessage}</h1>}

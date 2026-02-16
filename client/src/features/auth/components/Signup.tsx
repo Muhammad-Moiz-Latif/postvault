@@ -9,8 +9,9 @@ import logo from '../../../assets/logo.png';
 import google from '../../../assets/google.png';
 import show from '../../../assets/show.png';
 import hide from '../../../assets/eye.png';
-import bg from '../../../assets/login_bg.jpg';
-import { Camera } from "lucide-react";
+import bg from '../../../assets/bg2.png';
+import { Camera, ArrowRight } from "lucide-react";
+import { EditorialPanel } from "./EditorialPanel";
 
 
 const signupSchema = z.object({
@@ -37,19 +38,11 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
     const [isVisible, setIsVisible] = useState(false);
     const [Visible, setVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    const [previewUrl, setPreviewUrl] = useState<string>("");
+    const [previewUrl, setPreviewUrl] = useState("");
     const { mutate, isPending } = useSignup();
     const { handleSubmit, register, watch, reset, formState: { errors } } = useForm<signupType>({
         resolver: zodResolver(signupSchema)
     });
-    const [animationComplete, setAnimationComplete] = useState(false);
-
-    // Play animation only on initial mount
-    useEffect(() => {
-        setAnimationComplete(false);
-        const timer = setTimeout(() => setAnimationComplete(true), 800); // Wait for all animations to complete
-        return () => clearTimeout(timer);
-    }, []);
 
     const profilePicture = watch("image");
 
@@ -80,160 +73,187 @@ export const SignUp = ({ isLogin, setLogin }: { isLogin: boolean, setLogin: Reac
                 setErrorMessage(error.response.data.message);
                 console.error("Signup error in component:", error);
             }
-        })
-    }
+        });
+    };
 
     return (
-        <div className="flex w-full h-screen p-3 justify-center items-center bg-background">
-            {showVerifyModal && <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40" />}
-
-            {showVerifyModal && <div className="fixed inset-0 z-50 flex items-center justify-center">
-                <VerifyEmail tokenId={verificationTokenId} setVerifyModal={setShowVerifyModal} setIsLogin={setLogin} />
-            </div>}
-
-            <div className={`hidden lg:block w-full h-full rounded-2xl border border-primary/40 relative ${!animationComplete ? 'animate-slide-left' : ''}`}>
-                <img src={bg} className='size-full rounded-2xl' />
-                <h1 className='absolute bottom-10 left-3 font-serif text-3xl lg:text-5xl tracking-tight text-primary'>A calm place for your words.</h1>
-                <p className='absolute left-3 bottom-3 font-serif tracking-tight text-primary text-sm lg:text-lg'>Write without distraction. Share with intention.</p>
-            </div>
-            {/* Removed animation from parent container - only apply to individual elements */}
-            <div className="w-full h-full flex flex-col justify-start pt-8 lg:pt-15 items-center relative overflow-y-auto lg:overflow-visible">
-                <img src={logo} className={`size-7 lg:size-10 object-contain absolute top-0 left-[48%] lg:left-[46%] ${!animationComplete ? 'animate-slide-down' : ''}`} style={{ animationDelay: !animationComplete ? '0.1s' : '0s' }} />
-                <div className={`mb-4 text-center px-4 ${!animationComplete ? 'animate-slide-down' : ''}`} style={{ animationDelay: !animationComplete ? '0.2s' : '0s' }}>
-                    <h1 className='text-center tracking-tight text-lg lg:text-2xl font-sans text-foreground'>Create an account to write and publish</h1>
-                    <p className='text-xs lg:text-sm text-muted-foreground tracking-tight font-sans'>Please enter your details to sign up.</p>
+        <div className="h-screen w-full flex overflow-hidden bg-background">
+            {showVerifyModal && <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" />}
+            {showVerifyModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <VerifyEmail tokenId={verificationTokenId} setVerifyModal={setShowVerifyModal} setIsLogin={setLogin} />
                 </div>
+            )}
 
-                <form onSubmit={handleSubmit(onSubmit)} className={`w-full max-w-xs lg:max-w-md px-4 lg:px-0 ${!animationComplete ? 'animate-slide-down' : ''}`} style={{ animationDelay: !animationComplete ? '0.3s' : '0s' }}>
-                    <div className="flex justify-center items-center bg-muted mx-4 lg:mx-20 p-0.75 rounded-[4px] mb-4">
+            {/* ═══ Left Panel — Cinematic Editorial ═══ */}
+            <EditorialPanel bg={bg} />
+
+            {/* ═══ Right Panel — Signup Form ═══ */}
+            <div className="w-full lg:w-[45%] flex-1 flex items-center justify-center p-6 sm:p-10 relative overflow-y-auto">
+                {/* Texture */}
+                <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+
+                <div className="w-full max-w-[380px] relative z-10">
+                    {/* Mobile branding */}
+                    <div className="lg:hidden flex items-center gap-2 mb-6">
+                        <img src={logo} alt="PostVault" className="w-8 h-8" />
+                        <span className="font-serif text-lg font-semibold text-foreground">PostVault</span>
+                    </div>
+
+                    {/* Header */}
+                    <div className="mb-6 animate-slide-down">
+                        <div className="w-8 h-1 bg-primary rounded-full mb-4" />
+                        <h2 className="font-serif text-3xl font-bold text-foreground tracking-tight leading-tight">
+                            Start writing
+                        </h2>
+                        <p className="font-sans text-sm text-muted-foreground mt-1.5">
+                            Create your account in seconds.
+                        </p>
+                    </div>
+
+                    {/* Toggle */}
+                    <div className="flex bg-secondary rounded-xl p-1 mb-5 animate-slide-down" style={{ animationDelay: '0.05s' }}>
                         <button
-                            type='button'
                             onClick={() => setLogin(true)}
-                            className={`hover:cursor-pointer tracking-tight font-sans text-xs lg:text-sm ${isLogin ? "bg-primary text-primary-foreground" : "bg-zinc-300 text-secondary-foreground"} w-full h-8 rounded-l-[4px]`}
+                            className={`font-sans hover:cursor-pointer text-sm w-full py-2 rounded-lg transition-all duration-300 ${isLogin ? 'bg-primary text-primary-foreground font-semibold shadow-md' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Login
                         </button>
                         <button
-                            type='button'
                             onClick={() => setLogin(false)}
-                            className={`hover:cursor-pointer tracking-tight font-sans text-xs lg:text-sm ${!isLogin ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"} w-full h-8 rounded-r-[4px]`}
+                            className={`font-sans hover:cursor-pointer text-sm w-full py-2 rounded-lg transition-all duration-300 ${!isLogin ? 'bg-primary text-primary-foreground font-semibold shadow-md' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Signup
                         </button>
                     </div>
 
-                    {/* ENTER PROFILE PICTURE */}
-                    <div className="flex justify-center mb-2">
-                        <label className="relative cursor-pointer group">
-                            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-colors duration-300 flex items-center justify-center bg-muted">
-                                {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                                ) : (
-                                    <Camera size={24} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                                )}
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                        {errorMessage && (
+                            <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/8 border border-destructive/20 px-4 py-2.5 rounded-xl animate-slide-down">
+                                <div className="w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0" />
+                                {errorMessage}
                             </div>
-                            <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-sm">
-                                <span className="text-primary-foreground text-xs font-bold">+</span>
-                            </div>
-                            <input type="file" accept="image/*" className="hidden" {...register('image')} />
-                        </label>
-                    </div>
-                    {errors.image && <p className="text-destructive text-xs text-center mb-2 font-sans">{errors.image.message}</p>}
-                    {errorMessage && <p className="text-destructive text-xs text-center mb-2 font-sans">{errorMessage}</p>}
+                        )}
 
-                    {/* ENTER USERNAME */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5 mb-3">
-                        <div>
-                            <input
-                                {...register("username")}
-                                className="w-full h-8 rounded-[6px] bg-background border border-border text-xs lg:text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
-                                type="text"
-                                placeholder="Enter your username"
-                            />
-                            {errors.username && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.username.message}</p>}
+                        {/* Profile Picture — editorial ring style */}
+                        <div className="flex items-center gap-4 animate-slide-down" style={{ animationDelay: '0.1s' }}>
+                            <label className="relative cursor-pointer group">
+                                <div className="w-16 h-16 rounded-full border-2 border-dashed border-border overflow-hidden flex items-center justify-center group-hover:border-primary transition-colors bg-secondary/50">
+                                    {previewUrl ? (
+                                        <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Camera className="w-5 h-5 text-muted-foreground/60" />
+                                    )}
+                                </div>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shadow-md">
+                                    +
+                                </div>
+                                <input type="file" accept="image/*" {...register("image")} className="hidden" />
+                            </label>
+                            <div>
+                                <p className="text-sm font-medium text-foreground font-sans">Add a photo</p>
+                                <p className="text-[11px] text-muted-foreground font-sans">This helps others recognize you</p>
+                                {errors.image && <p className="text-xs text-destructive mt-0.5">{errors.image.message}</p>}
+                            </div>
                         </div>
 
-                        {/* ENTER EMAIL */}
-                        <div>
-                            <input
-                                {...register("email")}
-                                className="w-full h-8 rounded-[6px] bg-background border border-border text-xs lg:text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
-                                type="email"
-                                placeholder="Enter your email address"
-                            />
-                            {errors.email && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.email.message}</p>}
-                        </div>
-
-                        {/* ENTER PASSWORD */}
-                        <div>
-                            <div className="flex relative">
+                        {/* Username + Email side by side — underline inputs */}
+                        <div className="grid grid-cols-2 gap-4 animate-slide-down" style={{ animationDelay: '0.15s' }}>
+                            <div className="space-y-1">
+                                <label className="font-sans text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Username</label>
                                 <input
-                                    {...register('password')}
-                                    className="w-full h-8 rounded-[6px] bg-background border border-border text-xs lg:text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
-                                    type={isVisible ? "text" : "password"}
-                                    placeholder="Enter your password"
+                                    {...register("username")}
+                                    type="text"
+                                    placeholder="johndoe"
+                                    className={`w-full px-0 py-2 text-sm bg-transparent text-foreground font-sans outline-none transition-all border-b-2 placeholder:text-muted-foreground/40 focus:border-primary ${errors.username ? 'border-destructive' : 'border-border'}`}
                                 />
-                                <button
-                                    type='button'
-                                    className='hover:cursor-pointer absolute right-2 bottom-1.5'
-                                    onClick={() => setIsVisible((prev) => !prev)}>
-                                    <img src={isVisible ? show : hide} className='size-4 lg:size-5' />
-                                </button>
+                                {errors.username && <p className="text-[10px] text-destructive">{errors.username.message}</p>}
                             </div>
-
-                            {errors.password && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.password.message}</p>}
-                        </div>
-
-                        {/* CONFIRM PASSWORD */}
-                        <div>
-                            <div className="flex relative">
+                            <div className="space-y-1">
+                                <label className="font-sans text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Email</label>
                                 <input
-                                    {...register('confirmPassword')}
-                                    className="w-full h-8 rounded-[6px] bg-background border border-border text-xs lg:text-sm px-3 py-2 text-foreground font-sans outline-none focus:ring-2 focus:ring-ring"
-                                    type={Visible ? "text" : "password"}
-                                    placeholder="Confirm your password"
+                                    {...register("email")}
+                                    type="email"
+                                    placeholder="you@email.com"
+                                    className={`w-full px-0 py-2 text-sm bg-transparent text-foreground font-sans outline-none transition-all border-b-2 placeholder:text-muted-foreground/40 focus:border-primary ${errors.email ? 'border-destructive' : 'border-border'}`}
                                 />
-                                <button
-                                    type='button'
-                                    className='hover:cursor-pointer absolute right-2 bottom-1.5'
-                                    onClick={() => setVisible((prev) => !prev)}>
-                                    <img src={Visible ? show : hide} className='size-4 lg:size-5' />
-                                </button>
+                                {errors.email && <p className="text-[10px] text-destructive">{errors.email.message}</p>}
                             </div>
-
-                            {errors.confirmPassword && <p className="text-destructive text-xs mt-0.5 font-sans">{errors.confirmPassword.message}</p>}
                         </div>
-                    </div>
 
-                    {/* SUBMIT BUTTON */}
-                    <button
-                        type="submit"
-                        disabled={isPending}
-                        className="bg-primary text-primary-foreground hover:cursor-pointer w-full h-9 rounded-[6px] disabled:opacity-50 font-sans text-xs lg:text-sm font-medium hover:bg-primary/90 transition"
-                    >
-                        {isPending ? "Creating account..." : "Create account"}
-                    </button>
+                        {/* Password + Confirm side by side */}
+                        <div className="grid grid-cols-2 gap-4 animate-slide-down" style={{ animationDelay: '0.2s' }}>
+                            <div className="space-y-1">
+                                <label className="font-sans text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Password</label>
+                                <div className="relative">
+                                    <input
+                                        {...register("password")}
+                                        type={isVisible ? "text" : "password"}
+                                        placeholder="••••••••"
+                                        className={`w-full px-0 py-2 text-sm bg-transparent text-foreground font-sans outline-none transition-all border-b-2 pr-8 placeholder:text-muted-foreground/40 focus:border-primary ${errors.password ? 'border-destructive' : 'border-border'}`}
+                                    />
+                                    <button type="button" onClick={() => setIsVisible(prev => !prev)} className="absolute right-0 top-1/2 -translate-y-1/2">
+                                        <img src={isVisible ? hide : show} className="size-4 hover:cursor-pointer" alt="toggle" />
+                                    </button>
+                                </div>
+                                {errors.password && <p className="text-[10px] text-destructive">{errors.password.message}</p>}
+                            </div>
+                            <div className="space-y-1">
+                                <label className="font-sans text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Confirm</label>
+                                <div className="relative">
+                                    <input
+                                        {...register("confirmPassword")}
+                                        type={Visible ? "text" : "password"}
+                                        placeholder="••••••••"
+                                        className={`w-full px-0 py-2 text-sm bg-transparent text-foreground font-sans outline-none transition-all border-b-2 pr-8 placeholder:text-muted-foreground/40 focus:border-primary ${errors.confirmPassword ? 'border-destructive' : 'border-border'}`}
+                                    />
+                                    <button type="button" onClick={() => setVisible(prev => !prev)} className="absolute right-0 top-1/2 -translate-y-1/2">
+                                        <img src={Visible ? hide : show} className="size-4 hover:cursor-pointer" alt="toggle" />
+                                    </button>
+                                </div>
+                                {errors.confirmPassword && <p className="text-[10px] text-destructive">{errors.confirmPassword.message}</p>}
+                            </div>
+                        </div>
 
-                    <div className='flex my-2 gap-3 justify-center items-center'>
-                        <div className='w-full bg-border h-px'></div>
-                        <h1 className='text-xs text-muted-foreground font-sans'>OR</h1>
-                        <div className='w-full bg-border h-px'></div>
-                    </div>
+                        {/* Submit */}
+                        <button
+                            type="submit"
+                            disabled={isPending}
+                            className="w-full hover:cursor-pointer py-3 rounded-xl bg-foreground text-background font-sans text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group animate-slide-down"
+                            style={{ animationDelay: '0.25s' }}
+                        >
+                            {isPending ? 'Creating account...' : (
+                                <>
+                                    Create account
+                                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                </>
+                            )}
+                        </button>
 
-                    {/* GOOGLE  BUTTON */}
-                    <div
-                        onClick={() => {
-                            window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
-                        }}
-                        className="w-full h-9 text-xs lg:text-sm hover:cursor-pointer bg-background rounded-[6px] font-base border border-border transition flex justify-center items-center gap-1 overflow-hidden text-foreground font-sans hover:text-accent-foreground"
-                    >
-                        <span>Continue with</span>
-                        <img src={google} className='size-8 lg:size-10 mt-0.5' />
-                    </div>
-                </form>
-                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 left-3 lg:left-5 text-center lg:text-left'>Copyright 2025 @ PostVault LTD.</h1>
-                <h1 className='text-xs tracking-tight text-zinc-400 font-sans absolute bottom-2 lg:bottom-0 right-3 lg:right-5 text-center lg:text-right'>Privacy Policy</h1>
+                        {/* Divider */}
+                        <div className="flex items-center gap-4 animate-slide-down" style={{ animationDelay: '0.3s' }}>
+                            <div className="flex-1 h-px bg-border" />
+                            <span className="text-[10px] text-muted-foreground font-sans uppercase tracking-widest">or continue with</span>
+                            <div className="flex-1 h-px bg-border" />
+                        </div>
+
+                        {/* Google */}
+                        <button
+                            type="button"
+                            onClick={() => { window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`; }}
+                            className="w-full hover:cursor-pointer py-3 rounded-xl border-2 border-border bg-transparent text-foreground font-sans text-sm font-medium hover:border-foreground hover:bg-secondary/50 transition-all flex items-center justify-center gap-3 animate-slide-down"
+                            style={{ animationDelay: '0.35s' }}
+                        >
+                            <img src={google} className="w-5 h-5" alt="Google" />
+                            Continue with Google
+                        </button>
+                    </form>
+
+                    <p className="text-center text-[10px] text-muted-foreground/60 font-sans mt-6 lg:hidden">
+                        © 2025 PostVault LTD. · Privacy Policy
+                    </p>
+                </div>
             </div>
         </div>
-    )
+    );
 };

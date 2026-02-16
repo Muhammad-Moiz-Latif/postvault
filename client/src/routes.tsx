@@ -11,10 +11,10 @@ import { ProtectedRoute } from "./components/ProtectedRoutes";
 import { DetailPost } from "./features/posts/pages/DetailPost";
 import MyPosts from "./features/user/pages/MyPosts";
 import { EditPost } from "./features/user/pages/EditPosts";
-import { MyProfile } from "./features/user/pages/MyProfile";
+import UserProfile from "./features/user/pages/MyProfile";
 import { TagPage } from "./features/user/pages/TagPage";
-import PublishedPosts from "./features/user/pages/Published";
-import DraftPosts from "./features/user/pages/Drafts";
+import { SavedPosts } from "./features/user/pages/SavedPosts";
+import PublicProfile from "./features/user/pages/PublicProfile";
 
 
 export const router = createBrowserRouter(
@@ -71,16 +71,12 @@ export const router = createBrowserRouter(
                                     element: <CreatePost />,
                                 },
                                 {
+                                    path: "saved",
+                                    element: <SavedPosts />,
+                                },
+                                {
                                     path: "posts",
                                     element: <MyPosts />,
-                                },
-                                {
-                                    path: 'posts/published',
-                                    element: <PublishedPosts />
-                                },
-                                {
-                                    path: 'posts/drafts',
-                                    element: <DraftPosts />
                                 },
                                 {
                                     path: "posts/edit/:postId",
@@ -88,7 +84,11 @@ export const router = createBrowserRouter(
                                 },
                                 {
                                     path: "profile",
-                                    element: <MyProfile />
+                                    element: <UserProfile />
+                                },
+                                {
+                                    path: "profile/:userId",
+                                    element: <PublicProfile />
                                 }
                             ],
                         },

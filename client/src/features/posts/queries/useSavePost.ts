@@ -35,6 +35,8 @@ export function useSavePost(postId: string) {
 
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["post", postId] });
+            queryClient.invalidateQueries({ queryKey: ["saved-posts"] });
+
         },
     });
 };

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { detailedPostQueryOptions } from "../../posts/queries/useDetailedPost";
 import { useDeletePost } from "../../posts/queries/useDeletePost";
-import { toast } from "react-toastify";
+import { toast } from 'sonner';
 import { ArrowLeft, Loader2, Heart, MessageCircle, Trash2 } from "lucide-react";
 
 export default function PublishedPosts() {

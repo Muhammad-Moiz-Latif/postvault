@@ -218,13 +218,37 @@ export const postService = {
     },
 
     async getAllSavedPosts(userId: string) {
-        const savedPosts = await db.select({
-            post: PostTable
-        }).from(savedPostTable).innerJoin(
-            PostTable, eq(savedPostTable.postId, PostTable.id)).where(eq(
-                savedPostTable.userId, userId
-            ));
-        return savedPosts;
+        const savedPosts = await db.execute(sql`
+                SELECT
+                    p.id,
+                    p.title,
+                    p.paragraph,
+                    p.img,
+                    p."publishedAt",
+                    p.tags,
+
+                    (
+                        SELECT COUNT(*) FROM 
+                        likepost lp WHERE lp."postId" = p.id
+                    ) AS likes,
+
+                    (
+                        SELECT COUNT(*) FROM 
+                        comments c WHERE c."postId" = p.id
+                    ) AS comments,
+
+                    json_build_object (
+                        'id' , au.id,
+                        'username', au.username,
+                        'img' , au.img
+                    ) AS author
+                
+                FROM saved_posts sp JOIN posts p ON
+                p.id = sp."postId" JOIN users au ON
+                au.id = p."authorId" WHERE
+                sp."userId" = ${userId}
+            `);
+        return savedPosts.rows;
     },
 
     async getPost(postId: string, authorId: string) {

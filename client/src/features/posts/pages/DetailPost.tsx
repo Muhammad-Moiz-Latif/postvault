@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Bookmark, Heart, MessageCircle, Share2, MoreHorizontal, Loader2, ArrowLeft } from "lucide-react";
 import { useComment } from "../queries/useComment";
 import { useQueryClient } from "@tanstack/react-query";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from 'sonner';
 import { Comment } from "../components/Comment";
 import { useSavePost } from "../queries/useSavePost";
 import { useNavigate } from "react-router";
@@ -105,8 +105,6 @@ export const DetailPost = () => {
 
     return (
         <article className="min-h-screen bg-background">
-            <ToastContainer position="top-center" hideProgressBar />
-
             {/* Back button */}
             <div className="border-b border-border/50 bg-gradient-to-b from-card to-background">
                 <div className="max-w-3xl mx-auto px-4 py-4">

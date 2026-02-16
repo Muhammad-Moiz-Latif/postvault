@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router"
 import { useAuth } from "../../../../context/authContext";
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'sonner';
 
 export const GoogleSuccess = () => {
     const [searchParams] = useSearchParams();
@@ -28,12 +28,6 @@ export const GoogleSuccess = () => {
 
     return (
         <div className="flex items-center justify-center w-full backdrop-blur-3xl bg-white/50 min-h-screen absolute top-0">
-            <ToastContainer
-                position='top-center'
-                closeOnClick
-                draggable
-                hideProgressBar={true}
-            />
             <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
                 <p className="mt-4 text-gray-600">Completing sign in...</p>

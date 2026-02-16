@@ -1,7 +1,7 @@
 import { useNavigate, NavLink, useLocation } from "react-router";
 import { useAuth } from "../../../context/authContext";
 import { useLogout } from "../../auth/queries/useLogout";
-import { toast } from "react-toastify";
+import { toast } from 'sonner';
 import logo from "../../../assets/logo.png";
 import {
     PanelLeftOpen,
@@ -15,11 +15,10 @@ import {
     FileCheck,
     FilePenLine,
     Bookmark,
-    Bell,
 } from "lucide-react";
 import type React from "react";
 import { useUserProfile } from "../queries/useProfile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 const NAV_ITEMS = [
@@ -29,8 +28,8 @@ const NAV_ITEMS = [
 ];
 
 const POSTS_SUBITEMS = [
-    { icon: FileCheck, label: "Published", to: "/app/posts/published" },
-    { icon: FilePenLine, label: "Drafts", to: "/app/posts/drafts" },
+    { icon: FileCheck, label: "Published", to: "/app/posts?filter=published", filterParam: "published" },
+    { icon: FilePenLine, label: "Drafts", to: "/app/posts?filter=drafts", filterParam: "drafts" },
 ];
 
 export function SideBar({
@@ -51,14 +50,18 @@ export function SideBar({
     // Check if we're on any posts route
     const isPostsActive = location.pathname.startsWith("/app/posts");
 
+    // Auto-expand Posts dropdown when on a posts route
+    useEffect(() => {
+        if (isPostsActive && isOpen) {
+            setIsPostsOpen(true);
+        }
+    }, [isPostsActive, isOpen]);
+
     // Fetch unread notifications count
     const { data: unreadData } = useQuery({
         queryKey: ['notifications', 'unread'],
         queryFn: async () => {
-            // Replace with your actual API call
-            // const response = await fetch('/api/notifications/unread');
-            // return response.json();
-            return { count: 0 }; // Placeholder
+            return { count: 0 };
         },
         enabled: !!auth.user_id,
     });
@@ -92,7 +95,7 @@ export function SideBar({
             `}
         >
 
-            {/* Header - Logo + User Info (expanded) or just Toggle (collapsed) */}
+            {/* Header */}
             <div className={`
                 border-b border-border/50 bg-gradient-to-b from-card to-background
                 ${isOpen ? "px-4 py-[10.9px]" : "h-16 flex items-center justify-center"}
@@ -101,12 +104,12 @@ export function SideBar({
                     <div className="flex items-center justify-between gap-3">
                         <NavLink
                             to="/app"
-                            className="flex items-center gap-2 min-w-0 flex-1"
+                            className="flex items-center gap-2.5 min-w-0 flex-1 group"
                         >
                             <img
                                 src={logo}
                                 alt="PostVault"
-                                className="size-10 object-contain shrink-0"
+                                className="size-10 object-contain shrink-0 transition-transform group-hover:scale-105"
                             />
 
                             {isLoading ? (
@@ -138,9 +141,8 @@ export function SideBar({
                         <button
                             onClick={() => setIsOpen((prev) => !prev)}
                             className="
-                                p-1.5 -mr-1.5 rounded-full flex-shrink-0
+                                p-1.5 -mr-1.5 rounded-lg flex-shrink-0
                                 text-muted-foreground 
-                                hover:cursor-pointer
                                 hover:text-foreground hover:bg-accent/50
                                 transition-all duration-200 group
                             "
@@ -153,9 +155,9 @@ export function SideBar({
                     <button
                         onClick={() => setIsOpen((prev) => !prev)}
                         className="
-                            p-2.5 bg-accent rounded-full
+                            p-2.5 bg-accent rounded-lg
                             text-muted-foreground 
-                            hover:text-foreground hover:bg-accent/80 hover:cursor-pointer
+                            hover:text-foreground hover:bg-accent/80
                             transition-all duration-200 group
                         "
                         aria-label="Expand sidebar"
@@ -165,16 +167,17 @@ export function SideBar({
                 )}
             </div>
 
-            {/* Create Post - Primary action */}
+            {/* Create Post */}
             <div className="px-3 pt-4 pb-3">
                 <NavLink
                     to="/app/posts/new"
                     className={`
                         group relative
                         flex items-center justify-center gap-3 w-full
-                        h-10 rounded-full
+                        h-10 rounded-lg
                         bg-gradient-to-r from-primary to-primary/90 text-background
-                        hover:shadow-lg hover:from-primary/90 hover:to-primary/80
+                        hover:shadow-lg hover:shadow-primary/25 hover:from-primary/90 hover:to-primary/80
+                        active:scale-[0.98]
                         transition-all duration-200
                         font-semibold text-sm font-sans
                         ${isOpen && "px-3"}
@@ -183,7 +186,7 @@ export function SideBar({
                     <SquarePlus
                         size={18}
                         className="flex-shrink-0"
-                        strokeWidth={2}
+                        strokeWidth={2.5}
                     />
                     {isOpen && (
                         <span className="whitespace-nowrap">
@@ -191,7 +194,6 @@ export function SideBar({
                         </span>
                     )}
 
-                    {/* Tooltip for collapsed state */}
                     {!isOpen && (
                         <span className="
                             absolute left-full ml-2 px-2 py-1
@@ -207,10 +209,10 @@ export function SideBar({
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent mx-3 mb-5" />
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mx-3 mb-3" />
 
-            {/* Navigation items */}
-            <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+            {/* Navigation */}
+            <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
                 {NAV_ITEMS.map((item) => {
                     const Icon = item.icon;
                     //@ts-ignore
@@ -225,13 +227,13 @@ export function SideBar({
                                 `
                                     group relative
                                     flex items-center justify-center gap-3
-                                    h-9 rounded-full
-                                    text-sm font-normal font-sans
+                                    h-10 rounded-lg
+                                    text-sm font-medium font-sans
                                     transition-all duration-200
                                     ${isOpen && "px-3"}
                                     ${isActive
-                                    ? "bg-accent text-foreground font-semibold ring-2 ring-primary/20"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
+                                    ? "bg-accent text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                                 }
                                 `
                             }
@@ -240,17 +242,16 @@ export function SideBar({
                                 <>
                                     <div className="relative flex-shrink-0">
                                         <Icon
-                                            size={18}
-                                            strokeWidth={isActive ? 2 : 1.5}
+                                            size={19}
+                                            strokeWidth={isActive ? 2.5 : 2}
                                         />
-                                        {/* Badge for collapsed state */}
                                         {showBadge && !isOpen && (
                                             <span className="
                                                 absolute -top-1 -right-1
                                                 min-w-[16px] h-4 px-1
                                                 flex items-center justify-center
                                                 bg-destructive text-background
-                                                text-[10px] font-semibold rounded-full
+                                                text-[10px] font-bold rounded-full
                                             ">
                                                 {unreadCount > 99 ? '99+' : unreadCount}
                                             </span>
@@ -260,13 +261,12 @@ export function SideBar({
                                     {isOpen && (
                                         <span className="whitespace-nowrap w-full text-left flex items-center justify-between">
                                             <span>{item.label}</span>
-                                            {/* Badge for expanded state */}
                                             {showBadge && (
                                                 <span className="
                                                     min-w-[20px] h-5 px-1.5
                                                     flex items-center justify-center
                                                     bg-destructive text-background
-                                                    text-xs font-semibold rounded-full
+                                                    text-xs font-bold rounded-full
                                                 ">
                                                     {unreadCount > 99 ? '99+' : unreadCount}
                                                 </span>
@@ -274,7 +274,6 @@ export function SideBar({
                                         </span>
                                     )}
 
-                                    {/* Tooltip for collapsed state */}
                                     {!isOpen && (
                                         <span className="
                                             absolute left-full ml-2 px-2 py-1
@@ -293,115 +292,125 @@ export function SideBar({
                     );
                 })}
 
-                {/* Posts Dropdown with Tree Lines */}
-                <div>
-                    {/* Posts Parent Link */}
+                {/* Posts Section with Dropdown */}
+                <div className="space-y-1">
+                    {/* Posts Parent - Clickable Link */}
                     <div className="relative">
                         <NavLink
                             to="/app/posts"
                             end
-                            onClick={(e) => {
-                                if (isOpen) {
-                                    e.preventDefault();
-                                    setIsPostsOpen((prev) => !prev);
+                            className={({ isActive }) =>
+                                `
+                                    group relative
+                                    flex items-center justify-center gap-3
+                                    h-10 rounded-lg
+                                    text-sm font-medium font-sans
+                                    transition-all duration-200
+                                    ${isOpen && "px-3"}
+                                    ${isActive
+                                    ? "bg-accent text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                                 }
-                            }}
-                            className={`
-                                group relative
-                                flex items-center justify-center gap-3
-                                h-9 rounded-full
-                                text-sm font-normal font-sans
-                                transition-all duration-200
-                                ${isOpen && "px-3"}
-                                ${isPostsActive
-                                    ? "bg-accent text-foreground font-semibold ring-2 ring-primary/20"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
-                                }
-                            `}
+                                `
+                            }
                         >
-                            <FileText
-                                size={18}
-                                className="flex-shrink-0"
-                                strokeWidth={isPostsActive ? 2 : 1.5}
-                            />
-                            {isOpen && (
+                            {({ isActive }) => (
                                 <>
-                                    <span className="whitespace-nowrap flex-1 text-left">
-                                        Posts
-                                    </span>
-                                    <ChevronRight
-                                        size={16}
-                                        className={`
-                                            flex-shrink-0 transition-transform duration-200
-                                            ${isPostsOpen ? "rotate-90" : "rotate-0"}
-                                        `}
+                                    <FileText
+                                        size={19}
+                                        className="flex-shrink-0"
+                                        strokeWidth={isActive ? 2.5 : 2}
                                     />
-                                </>
-                            )}
+                                    {isOpen && (
+                                        <>
+                                            <span className="whitespace-nowrap flex-1 text-left">
+                                                Posts
+                                            </span>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setIsPostsOpen((prev) => !prev);
+                                                }}
+                                                className="
+                                                    p-1 -mr-1 rounded
+                                                    hover:bg-accent/50
+                                                    transition-colors duration-150
+                                                "
+                                                aria-label={isPostsOpen ? "Collapse posts menu" : "Expand posts menu"}
+                                            >
+                                                <ChevronRight
+                                                    size={16}
+                                                    className={`
+                                                        flex-shrink-0 transition-transform duration-200
+                                                        ${isPostsOpen ? "rotate-90" : "rotate-0"}
+                                                    `}
+                                                />
+                                            </button>
+                                        </>
+                                    )}
 
-                            {/* Tooltip for collapsed state */}
-                            {!isOpen && (
-                                <span className="
-                                    absolute left-full ml-2 px-2 py-1
-                                    bg-foreground text-background text-xs rounded
-                                    whitespace-nowrap pointer-events-none
-                                    opacity-0 group-hover:opacity-100
-                                    transition-opacity duration-200
-                                ">
-                                    Posts
-                                </span>
+                                    {!isOpen && (
+                                        <span className="
+                                            absolute left-full ml-2 px-2 py-1
+                                            bg-foreground text-background text-xs rounded
+                                            whitespace-nowrap pointer-events-none
+                                            opacity-0 group-hover:opacity-100
+                                            transition-opacity duration-200
+                                        ">
+                                            Posts
+                                        </span>
+                                    )}
+                                </>
                             )}
                         </NavLink>
                     </div>
 
-                    {/* Dropdown Subitems with Tree Connectors */}
+                    {/* Dropdown Subitems */}
                     {isOpen && isPostsOpen && (
-                        <div className="relative mt-0.5 space-y-0.5 pl-3">
-                            {/* Vertical line connecting all children */}
+                        <div className="relative space-y-0.5 pl-3 pt-1">
+                            {/* Vertical connector line */}
                             <div className="
-                                absolute left-[21px] top-0 bottom-2
-                                w-px bg-border
+                                absolute left-[22px] top-3 bottom-1
+                                w-[1.5px] bg-border/60
                             " />
 
                             {POSTS_SUBITEMS.map((subitem) => {
                                 const SubIcon = subitem.icon;
+                                const searchParams = new URLSearchParams(location.search);
+                                const currentFilter = searchParams.get("filter");
+                                const isActive = location.pathname === "/app/posts" && currentFilter === subitem.filterParam;
 
                                 return (
                                     <div key={subitem.to} className="relative">
-                                        {/* Horizontal connector line */}
+                                        {/* Horizontal connector */}
                                         <div className="
-                                            absolute left-[21px] top-1/2 -translate-y-1/2
-                                            w-3 h-px bg-border
+                                            absolute left-[22px] top-1/2 -translate-y-1/2
+                                            w-3 h-[1.5px] bg-border/60
                                         " />
 
                                         <NavLink
                                             to={subitem.to}
-                                            className={({ isActive }) =>
-                                                `
-                                                    group relative
-                                                    flex items-center gap-3
-                                                    h-8 rounded-full pl-[33px] pr-3
-                                                    text-sm font-normal font-sans
-                                                    transition-all duration-200
-                                                    ${isActive
-                                                    ? "bg-accent/60 text-foreground font-semibold"
-                                                    : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
+                                            className={`
+                                                group relative
+                                                flex items-center gap-2.5
+                                                h-9 rounded-lg pl-9 pr-3
+                                                text-sm font-medium font-sans
+                                                transition-all duration-200
+                                                ${isActive
+                                                    ? "bg-accent/70 text-foreground"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
                                                 }
-                                                `
-                                            }
+                                            `}
                                         >
-                                            {({ isActive }) => (
-                                                <>
-                                                    <SubIcon
-                                                        size={16}
-                                                        className="flex-shrink-0"
-                                                        strokeWidth={isActive ? 2 : 1.5}
-                                                    />
-                                                    <span className="whitespace-nowrap">
-                                                        {subitem.label}
-                                                    </span>
-                                                </>
-                                            )}
+                                            <SubIcon
+                                                size={16}
+                                                className="flex-shrink-0"
+                                                strokeWidth={isActive ? 2.5 : 2}
+                                            />
+                                            <span className="whitespace-nowrap">
+                                                {subitem.label}
+                                            </span>
                                         </NavLink>
                                     </div>
                                 );
@@ -412,9 +421,9 @@ export function SideBar({
             </nav>
 
             {/* Divider */}
-            <div className="h-px bg-gradient-to-r from-transparent via-border/50 to-transparent mx-3" />
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mx-3" />
 
-            {/* Logout button */}
+            {/* Logout */}
             <div className="px-3 py-4">
                 <button
                     onClick={handleLogout}
@@ -422,19 +431,20 @@ export function SideBar({
                     className={`
                         group relative
                         flex items-center justify-center gap-3 w-full
-                        h-9 rounded-full
-                        text-sm font-normal font-sans
+                        h-10 rounded-lg
+                        text-sm font-medium font-sans
                         text-muted-foreground
                         hover:text-destructive hover:bg-destructive/10
+                        active:scale-[0.98]
                         transition-all duration-200
-                        disabled:opacity-50 disabled:cursor-not-allowed
+                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
                         ${isOpen && "px-3"}
                     `}
                 >
                     <LogOut
-                        size={18}
+                        size={19}
                         className="flex-shrink-0"
-                        strokeWidth={1.5}
+                        strokeWidth={2}
                     />
                     {isOpen && (
                         <span className="whitespace-nowrap w-full text-left">
@@ -442,7 +452,6 @@ export function SideBar({
                         </span>
                     )}
 
-                    {/* Tooltip for collapsed state */}
                     {!isOpen && !isPending && (
                         <span className="
                             absolute left-full ml-2 px-2 py-1

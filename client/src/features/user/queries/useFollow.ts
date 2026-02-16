@@ -40,6 +40,7 @@ export function useFollow(postId: string) {
             // This ensures all posts by this author show updated follow status
             queryClient.invalidateQueries({ queryKey: ['post'] });
             queryClient.invalidateQueries({ queryKey: ['all-posts'] });
+            queryClient.invalidateQueries({ queryKey: ['profile'] });
         }
     });
 };

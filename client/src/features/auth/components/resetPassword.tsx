@@ -4,7 +4,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router"
 import z from "zod";
 import { useReset } from "../queries/useReset";
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'sonner';
 import password from '../../../assets/password.png';
 
 
@@ -65,12 +65,6 @@ export const ResetPassword = () => {
 
     return (
         <div className="w-full h-screen flex flex-col gap-3 justify-center items-center">
-            <ToastContainer
-                position='top-center'
-                closeOnClick
-                draggable
-                hideProgressBar={true}
-            />
             <div className="border border-zinc-200 rounded-md p-1.5">
                 <img src={password} className="size-5" />
             </div>

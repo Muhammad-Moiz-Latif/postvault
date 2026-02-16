@@ -63,6 +63,46 @@ export const userService = {
                 u.img,
                 u."createdAt",
 
+                -- the people you follow
+                COALESCE (
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', fu.id,
+                                'username', fu.username,
+                                'img', fu.img,
+                                'followedOn', f."createdAt"
+                            )
+                        ) FROM follows f
+                          JOIN users fu ON
+                          f."followingId" = fu.id WHERE
+                          f."followerId" = ${userId}
+                    ), '[]' :: json
+                ) AS followings,
+
+                -- the people who follow you
+                COALESCE (
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', fu.id,
+                                'username', fu.username,
+                                'img', fu.img,
+                                'followedOn', f."createdAt"
+                            )
+                        ) FROM follows f
+                          JOIN users fu ON
+                          f."followerId" = fu.id WHERE
+                          f."followingId" = ${userId}
+                    ), '[]' :: json
+                ) AS followers,
+
+                EXISTS (
+                    SELECT 1
+                    FROM follows f
+                    WHERE f."followerId" = ${userId}
+                ) as followedbyme,
+
                 -- liked posts
                 COALESCE(
                     (
@@ -82,12 +122,6 @@ export const userService = {
                     '[]'::json
                 ) AS liked_posts,
 
-                EXISTS (
-                   SELECT 1 FROM 
-                   follows f WHERE
-                   f."followerId" = ${userId}
-                ) AS followedbyme,
-
                 -- liked comments
                 COALESCE(
                     (
@@ -95,15 +129,50 @@ export const userService = {
                             json_build_object(
                                 'id', c.id,
                                 'text', c.text,
-                                'likedAt', lc."createdAt"
+                                'likedAt', lc."createdAt",
+                                'author', (
+                                    json_build_object (
+                                        'id', cu.id,
+                                        'username', cu.username,
+                                        'img', cu.img
+                                    )
+                                )
                             )
                         )
                         FROM likecomment lc
                         JOIN comments c ON c.id = lc."commentId"
+                        JOIN users cu ON c."authorId" = cu.id
                         WHERE lc."authorId" = u.id
                     ),
                     '[]'::json
                 ) AS liked_comments,
+
+                COALESCE (
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'id', p.id,
+                                'title', p.title,
+                                'paragraph', p.paragraph,
+                                'img', p.img,
+                                'tags', p.tags,
+                                'publishedAt', p."publishedAt",
+                                'likes', (
+                                    SELECT COUNT(*)
+                                    FROM likepost lp 
+                                    WHERE lp."postId" = p.id
+                                ),
+                                'comments', (
+                                    SELECT COUNT(*)
+                                    FROM comments c
+                                    WHERE c."postId" = p.id
+                                )
+                            )
+                        ) FROM posts p 
+                          WHERE p."authorId" = ${userId}
+                          AND p.status = 'PUBLISHED'
+                    ),'[]' :: json
+                ) AS posts,
 
                 -- saved posts
                 COALESCE(
