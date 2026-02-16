@@ -35,7 +35,7 @@ const readingTime = (text: string) => {
     return `${Math.max(1, Math.ceil(text.trim().split(/\s+/).length / 200))} min read`;
 };
 
-export const PostCard = ({ post, index = 0 }: { post: PostType; index?: number }) => {
+export const PostCard = ({ post }: { post: PostType; index?: number }) => {
     const navigate = useNavigate();
     const [isBookmarked, setIsBookmarked] = useState(false);
 

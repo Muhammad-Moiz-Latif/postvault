@@ -10,13 +10,12 @@ import {
     Compass,
     BookOpen
 } from "lucide-react";
-import { toast } from "sonner";
 
 export function SavedPosts() {
     const { data, isError, isLoading } = useMySavedPosts();
     const savedPosts = data?.data ?? [];
     const navigate = useNavigate();
-    const [unsavingId, setUnsavingId] = useState<string | null>(null);
+    const [unsavingId] = useState<string | null>(null);
 
     if (isLoading) {
         return (

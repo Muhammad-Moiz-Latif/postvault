@@ -2,7 +2,6 @@ import { Outlet } from "react-router";
 import { Navbar } from "../features/user/components/Navbar";
 import { SideBar } from "../features/user/components/Sidebar";
 import { useSidebar } from "../context/sidebarContext";
-import { toast } from 'sonner';
 
 export const MainLayout = () => {
     const { isOpen, setIsOpen } = useSidebar();
